@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+
+@theme {
+  /* Brand Colors from Customer Brief */
+  --color-plum: #4B2E83;      /* Deep Plum (Luxury anchor) */
+  --color-rosegold: #B76E79;  /* Rose Gold (Beauty highlight) */
+  --color-cream: #FFF5E7;     /* Cream White (Softness) */
+  
+  /* Neutral Palette */
+  --color-charcoal: #333333;
+  --color-beige: #F8F4F0;
+
+  /* Typography */
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Custom Animations for the "Luxe" feel */
+  --animate-fade-in: fade-in 0.8s ease-out;
+  --animate-slide-up: slide-up 0.6s ease-out;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+
+/* Base resets to enforce the brand aesthetic across the site */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-cream text-charcoal font-body antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+
+  /* Custom selection color to match Rose Gold */
+  ::selection {
+    @apply bg-rosegold/30 text-plum;
+  }
+}
+
+/* Custom Utility Classes for your Programmer Workflow */
+@layer components {
+  .btn-primary {
+    @apply bg-plum text-cream px-8 py-4 uppercase tracking-[0.2em] text-xs font-bold 
+           transition-all duration-300 hover:bg-rosegold hover:shadow-xl active:scale-95;
+  }
+
+  .btn-outline {
+    @apply border border-plum/20 text-plum px-8 py-4 uppercase tracking-[0.2em] text-xs font-bold 
+           transition-all duration-300 hover:border-rosegold hover:text-rosegold;
+  }
+
+  .section-padding {
+    @apply py-20 md:py-32 px-6 md:px-12;
+  }
+}
