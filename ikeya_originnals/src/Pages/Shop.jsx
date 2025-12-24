@@ -120,10 +120,10 @@ const Shop = () => {
       <div className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
         {/* --- HEADER --- */}
         <header className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-display text-plum mb-4 uppercase tracking-tighter">
+          <h1 className="text-4xl md:text-5xl font-display text-black mb-4 uppercase tracking-tighter">
             Ikeyà <span className="text-rosegold italic">Shop</span>
           </h1>
-          <p className="text-plum/60 max-w-md mx-auto">
+          <p className="text-black/60 max-w-md mx-auto">
             From handcrafted garments to organic beauty rituals. Everything you need to glow.
           </p>
         </header>
@@ -138,7 +138,7 @@ const Shop = () => {
                 className={`text-xs uppercase tracking-[0.2em] font-bold transition-all ${
                   activeCategory === cat 
                     ? "text-rosegold border-b-2 border-rosegold" 
-                    : "text-plum/40 hover:text-plum"
+                    : "text-black/40 hover:text-black/80"
                 }`}
               >
                 {cat}
@@ -146,7 +146,7 @@ const Shop = () => {
             ))}
           </div>
           
-          <div className="flex items-center gap-2 text-plum/60 text-xs uppercase tracking-widest font-medium">
+          <div className="flex items-center gap-2 text-black/60 text-xs uppercase tracking-widest font-medium">
             <Filter size={14} className="text-rosegold" />
             {filteredProducts.length} Results
           </div>
@@ -166,7 +166,7 @@ const Shop = () => {
                 <div className="absolute inset-0 bg-plum/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 
                 {/* QUICK ADD BUTTON */}
-                <button className="absolute bottom-4 left-4 right-4 bg-white/95 text-plum py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-rosegold hover:text-white">
+                <button className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-rosegold hover:text-white">
                   <ShoppingBag size={14} /> Add to Bag
                 </button>
               </div>
@@ -174,14 +174,14 @@ const Shop = () => {
               <div className="mt-auto space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-sm font-bold text-plum group-hover:text-rosegold transition-colors">
+                    <h3 className="text-sm font-bold text-black group-hover:text-rosegold transition-colors">
                       {p.name}
                     </h3>
-                    <p className="text-[10px] uppercase text-plum/50 tracking-widest font-medium">
+                    <p className="text-[10px] uppercase text-black/50 tracking-widest font-medium">
                       {p.category}
                     </p>
                   </div>
-                  <p className="text-sm font-bold text-plum">{p.price}</p>
+                  <p className="text-sm font-bold text-black">{p.price}</p>
                 </div>
               </div>
             </div>

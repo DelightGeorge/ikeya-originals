@@ -35,7 +35,7 @@ const Navbar = ({ onSearch }) => {
         {/* LOGO */}
         <Link
           to="/"
-          className="font-display text-2xl font-bold text-plum tracking-wide"
+          className="font-display text-2xl font-bold text-rosegold tracking-wide"
         >
           Ikeyà
         </Link>
@@ -48,7 +48,7 @@ const Navbar = ({ onSearch }) => {
               to={link.path}
               className={({ isActive }) =>
                 `relative font-medium transition-colors
-                 ${isActive ? "text-rosegold" : "text-plum hover:text-rosegold"}`
+                 ${isActive ? "text-rosegold" : "text-black hover:text-rosegold"}`
               }
             >
               {link.name}
@@ -62,20 +62,20 @@ const Navbar = ({ onSearch }) => {
           {/* SEARCH TOGGLE */}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
-            className="text-plum hover:text-rosegold transition"
+            className="text-black cursor-pointer hover:text-rosegold transition"
             aria-label="Search"
           >
             <Search size={20} />
           </button>
 
           {/* LOGIN */}
-          <NavLink to="/login" className="flex items-center gap-1 text-plum hover:text-rosegold transition hover:cursor-pointer">
+          <NavLink to="/login" className="flex items-center gap-1 text-black hover:text-rosegold transition hover:cursor-pointer">
             <User size={20} />
             <span className="hidden sm:inline text-sm">Login</span>
           </NavLink>
 
           {/* CART */}
-          <NavLink to="/cart" className="relative text-plum hover:text-rosegold transition hover:cursor-pointer" aria-label="Cart">
+          <NavLink to="/cart" className="relative text-black hover:text-rosegold transition hover:cursor-pointer" aria-label="Cart">
             <ShoppingBag size={20} />
             <span className="absolute -top-1 -right-1 bg-rosegold text-white text-[10px] rounded-full px-1.5">
               0
@@ -84,7 +84,7 @@ const Navbar = ({ onSearch }) => {
 
           {/* MOBILE MENU */}
           <button
-            className="md:hidden text-plum"
+            className="md:hidden text-black"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? <X /> : <Menu />}
@@ -103,13 +103,13 @@ const Navbar = ({ onSearch }) => {
             className="border-t border-plum/10 bg-cream px-6 overflow-hidden"
           >
             <div className="max-w-7xl mx-auto py-4 flex items-center gap-3">
-              <Search size={18} className="text-plum/60" />
+              <Search size={18} className="text-black/60" />
               <input
                 type="text"
                 value={query}
                 onChange={handleSearch}
                 placeholder="Search fashion, wigs, oils..."
-                className="w-full bg-transparent outline-none text-sm placeholder:text-plum/40"
+                className="w-full bg-transparent outline-none text-sm placeholder:text-black/40"
               />
               <button
                 onClick={() => setSearchOpen(false)}
@@ -130,9 +130,9 @@ const Navbar = ({ onSearch }) => {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="md:hidden bg-cream border-t border-plum/10 px-6 py-6 space-y-6"
+            className="md:hidden bg-cream border-t border-black/10 px-6 py-6 space-y-6"
           >
-            <nav className="flex flex-col gap-4 text-plum font-medium">
+            <nav className="flex flex-col gap-4 text-black font-medium">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
@@ -146,10 +146,10 @@ const Navbar = ({ onSearch }) => {
             </nav>
 
             <div className="flex gap-4">
-              <button className="flex-1 border border-plum py-3 text-plum uppercase tracking-widest text-xs">
+              <button className="flex-1 border border-plum py-3 text-black uppercase tracking-widest text-xs">
                 Login
               </button>
-              <button className="flex-1 bg-plum text-white py-3 uppercase tracking-widest text-xs">
+              <button className="flex-1 bg-black text-white py-3 uppercase tracking-widest text-xs">
                 Register
               </button>
             </div>
