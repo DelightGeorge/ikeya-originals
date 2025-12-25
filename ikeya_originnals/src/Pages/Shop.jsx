@@ -1,144 +1,81 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom"; 
 import Layout from "../Shared/Layout/Layout";
-import { Filter, ShoppingBag } from "lucide-react";
+import { Filter, ShoppingBag, Loader2, AlertCircle, X } from "lucide-react";
+import { getProducts } from "../services/productService"; 
+import { useCart } from "../Context/CartContext";
 
 const Shop = () => {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const { addToBag } = useCart();
+  const location = useLocation();
+
+  // --- GET SEARCH QUERY FROM URL ---
+  const searchParams = new URLSearchParams(location.search);
+  const searchQuery = searchParams.get("search")?.toLowerCase() || "";
+
+  useEffect(() => {
+    const fetchShopData = async () => {
+      try {
+        setLoading(true);
+        const response = await getProducts();
+        setProducts(response.data); 
+      } catch (err) {
+        setError("Failed to connect to the server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchShopData();
+  }, []);
+
+  // --- COMBINED FILTER LOGIC (Category + Search) ---
+  const filteredProducts = products.filter((p) => {
+    const matchesCategory = activeCategory === "All" || 
+      p.category?.name === activeCategory || 
+      p.type === activeCategory;
+    
+    const matchesSearch = !searchQuery || 
+      p.name.toLowerCase().includes(searchQuery) || 
+      p.description?.toLowerCase().includes(searchQuery);
+
+    return matchesCategory && matchesSearch;
+  });
 
   const categories = ["All", "Fashion", "Beauty"];
-
-  const products = [
-    // --- FASHION CATEGORY ---
-    {
-      id: 1,
-      category: "Fashion",
-      name: "Signature Silk Dress",
-      price: "₦45,000",
-      img: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=75&w=1000",
-    },
-    {
-      id: 2,
-      category: "Fashion",
-      name: "Adire Two-Piece Set",
-      price: "₦32,000",
-      img: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=75&w=1000",
-    },
-    {
-      id: 3,
-      category: "Fashion",
-      name: "Minimal Linen Wear",
-      price: "₦38,000",
-      img: "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&q=75&w=1000",
-    },
-    {
-      id: 4,
-      category: "Fashion",
-      name: "Classic Evening Gown",
-      price: "₦65,000",
-      img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=75&w=1000",
-    },
-    {
-      id: 5,
-      category: "Fashion",
-      name: "Summer Kaftan",
-      price: "₦28,000",
-      img: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&q=75&w=1000",
-    },
-    {
-      id: 6,
-      category: "Fashion",
-      name: "Pleated Midi Skirt",
-      price: "₦22,500",
-      img: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=75&w=1000",
-    },
-    {
-      id: 7,
-      category: "Fashion",
-      name: "Luxe Wrap Top",
-      price: "₦18,000",
-      img: "https://images.unsplash.com/photo-1604176354204-926e737828ee?auto=format&fit=crop&q=75&w=1000",
-    },
-    {
-      id: 8,
-      category: "Fashion",
-      name: "Boubou Elegance",
-      price: "₦42,000",
-      img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=75&w=1000",
-    },
-
-    // --- BEAUTY CATEGORY ---
-    {
-      id: 101,
-      category: "Beauty",
-      name: "Nourishing Growth Oil",
-      price: "₦8,500",
-      img: "https://images.unsplash.com/photo-1611080541599-8c6dbde6ed28?auto=format&fit=crop&q=75&w=800",
-    },
-    {
-      id: 102,
-      category: "Beauty",
-      name: "Whipped Shea Hair Butter",
-      price: "₦7,000",
-      img: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&q=75&w=800",
-    },
-    {
-      id: 103,
-      category: "Beauty",
-      name: "Hydrating Hair Mist",
-      price: "₦5,500",
-      img: "https://images.unsplash.com/photo-1535572290543-960a8046f5af?auto=format&fit=crop&q=75&w=800",
-    },
-    {
-      id: 104,
-      category: "Beauty",
-      name: "Scalp Detox Scrub",
-      price: "₦9,000",
-      img: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&q=75&w=800",
-    },
-    {
-      id: 105,
-      category: "Beauty",
-      name: "Complete Hair Kit",
-      price: "₦25,000",
-      img: "https://images.unsplash.com/photo-1594125355635-32923ad44d27?auto=format&fit=crop&q=75&w=800",
-    },
-    {
-      id: 106,
-      category: "Beauty",
-      name: "Satin Hair Bonnet",
-      price: "₦4,500",
-      img: "https://images.unsplash.com/photo-1634449571010-023595e5b7fe?auto=format&fit=crop&q=75&w=800",
-    }
-  ];
-
-  const filteredProducts = activeCategory === "All" 
-    ? products 
-    : products.filter(p => p.category === activeCategory);
 
   return (
     <Layout>
       <div className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
-        {/* --- HEADER --- */}
         <header className="mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-display text-black mb-4 uppercase tracking-tighter">
-            Ikeyà <span className="text-rosegold italic">Shop</span>
+            Ikeyà <span className="text-amber-800 italic">Collection</span>
           </h1>
-          <p className="text-black/60 max-w-md mx-auto">
-            From handcrafted garments to organic beauty rituals. Everything you need to glow.
-          </p>
+          
+          {/* Active Search Indicator */}
+          {searchQuery && (
+            <div className="flex items-center justify-center gap-3 mt-4">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">Searching for:</span>
+              <div className="flex items-center gap-2 bg-neutral-100 px-3 py-1 rounded-full">
+                <span className="text-[10px] font-bold uppercase tracking-widest italic">"{searchQuery}"</span>
+                <Link to="/shop" className="text-neutral-400 hover:text-black"><X size={12}/></Link>
+              </div>
+            </div>
+          )}
         </header>
 
-        {/* --- FILTER BAR --- */}
-        <div className="flex flex-col md:flex-row justify-between items-center border-b border-plum/10 pb-6 mb-10 gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-center border-b border-neutral-100 pb-6 mb-10 gap-6">
           <div className="flex gap-8">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={`text-xs uppercase tracking-[0.2em] font-bold transition-all ${
-                  activeCategory === cat 
-                    ? "text-rosegold border-b-2 border-rosegold" 
-                    : "text-black/40 hover:text-black/80"
+                  activeCategory === cat ? "text-amber-800 border-b-2 border-amber-800" : "text-black/40 hover:text-black/80"
                 }`}
               >
                 {cat}
@@ -147,57 +84,57 @@ const Shop = () => {
           </div>
           
           <div className="flex items-center gap-2 text-black/60 text-xs uppercase tracking-widest font-medium">
-            <Filter size={14} className="text-rosegold" />
+            <Filter size={14} className="text-amber-800" />
             {filteredProducts.length} Results
           </div>
         </div>
 
-        {/* --- PRODUCT GRID --- */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12">
-          {filteredProducts.map((p) => (
-            <div key={p.id} className="group flex flex-col h-full">
-              <div className="relative aspect-[3/4] bg-gray-50 overflow-hidden mb-4">
-                <img
-                  src={p.img}
-                  alt={p.name}
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-plum/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="animate-spin text-amber-900 mb-4" size={32} />
+            <p className="text-[10px] uppercase tracking-widest text-black/40">Curating Collection...</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-20 text-red-400">
+            <AlertCircle size={32} className="mb-2" />
+            <p className="text-sm">{error}</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">No pieces found matching your criteria.</p>
+            <Link to="/shop" className="text-[10px] font-bold uppercase tracking-widest border-b border-black mt-4 inline-block">View All Products</Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12">
+            {filteredProducts.map((p) => (
+              <div key={p.id} className="group flex flex-col h-full">
+                <div className="relative aspect-[3/4] bg-neutral-50 overflow-hidden mb-4">
+                  <Link to={`/product/${p.id}`}>
+                    <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                  </Link>
+                  <button 
+                    onClick={() => addToBag(p)}
+                    className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
+                  >
+                    <ShoppingBag size={14} /> Add to Bag
+                  </button>
+                </div>
                 
-                {/* QUICK ADD BUTTON */}
-                <button className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-rosegold hover:text-white">
-                  <ShoppingBag size={14} /> Add to Bag
-                </button>
-              </div>
-              
-              <div className="mt-auto space-y-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-sm font-bold text-black group-hover:text-rosegold transition-colors">
+                <div className="mt-auto space-y-2 text-center md:text-left">
+                  <Link to={`/product/${p.id}`}>
+                    <h3 className="text-sm font-bold text-black group-hover:text-amber-800 transition-colors uppercase tracking-tight">
                       {p.name}
                     </h3>
-                    <p className="text-[10px] uppercase text-black/50 tracking-widest font-medium">
-                      {p.category}
-                    </p>
-                  </div>
-                  <p className="text-sm font-bold text-black">{p.price}</p>
+                  </Link>
+                  <p className="text-[10px] uppercase text-black/50 tracking-widest">
+                    {p.category?.name || p.type}
+                  </p>
+                  <p className="text-sm font-bold text-black mt-1">
+                    ₦{(p.price / (p.price > 100000 ? 1 : 1)).toLocaleString()}
+                  </p>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* NO RESULTS FOUND */}
-        {filteredProducts.length === 0 && (
-          <div className="py-40 text-center">
-            <h3 className="text-2xl font-display text-plum/30">No products found.</h3>
-            <button 
-              onClick={() => setActiveCategory("All")}
-              className="mt-4 text-rosegold underline uppercase text-xs font-bold"
-            >
-              Back to all products
-            </button>
+            ))}
           </div>
         )}
       </div>

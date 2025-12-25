@@ -1,157 +1,149 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import {
-  Search,
-  ShoppingBag,
-  User,
-  Menu,
-  X,
-} from "lucide-react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Search, ShoppingBag, User, Menu, X, LayoutDashboard, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "../Context/CartContext";
 
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "Shop", path: "/shop" },
   { name: "Lookbook", path: "/lookbook" },
   { name: "About", path: "/about" },
-  { name: "Contact", path: "/contact" },
 ];
 
-const Navbar = ({ onSearch }) => {
+const Navbar = () => {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const { cartCount } = useCart();
+  
+  const user = JSON.parse(localStorage.getItem("user") || "null");
 
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    setQuery(value);
-    onSearch?.(value);
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+      navigate(`/shop?search=${encodeURIComponent(query.trim())}`);
+      setSearchOpen(false);
+      setQuery("");
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+    setMenuOpen(false);
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-cream/80 backdrop-blur-md border-b border-plum/10">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-
-        {/* LOGO */}
-        <Link
-          to="/"
-          className="font-display text-2xl font-bold text-rosegold tracking-wide"
-        >
+    <header className="fixed top-0 left-0 w-full z-[100] bg-white border-b border-neutral-100">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between bg-white relative z-[110]">
+        <Link to="/" onClick={() => setMenuOpen(false)} className="font-display text-2xl font-bold text-black tracking-tighter uppercase">
           Ikeyà
         </Link>
 
-        {/* DESKTOP NAV LINKS */}
-        <nav className="hidden md:flex items-center gap-8">
+        {/* DESKTOP LINKS */}
+        <nav className="hidden lg:flex items-center gap-10">
           {navLinks.map((link) => (
-            <NavLink
-              key={link.name}
-              to={link.path}
-              className={({ isActive }) =>
-                `relative font-medium transition-colors
-                 ${isActive ? "text-rosegold" : "text-black hover:text-rosegold"}`
-              }
-            >
+            <NavLink key={link.name} to={link.path} className={({ isActive }) => `text-[10px] uppercase tracking-[0.3em] font-bold transition-all duration-300 ${isActive ? "text-amber-900" : "text-black/50 hover:text-black"}`}>
               {link.name}
-              <span className="absolute left-0 -bottom-1 h-[2px] w-0 bg-rosegold transition-all group-hover:w-full" />
             </NavLink>
           ))}
         </nav>
 
-        {/* RIGHT ICONS */}
-        <div className="flex items-center gap-5">
-          {/* SEARCH TOGGLE */}
-          <button
-            onClick={() => setSearchOpen(!searchOpen)}
-            className="text-black cursor-pointer hover:text-rosegold transition"
-            aria-label="Search"
-          >
-            <Search size={20} />
+        {/* ACTIONS & AUTH */}
+        <div className="flex items-center gap-4 md:gap-6">
+          <button onClick={() => {setSearchOpen(!searchOpen); setMenuOpen(false)}} className="hover:text-amber-900 transition-colors">
+            <Search size={18} strokeWidth={1.5} />
           </button>
 
-          {/* LOGIN */}
-          <NavLink to="/login" className="flex items-center gap-1 text-black hover:text-rosegold transition hover:cursor-pointer">
-            <User size={20} />
-            <span className="hidden sm:inline text-sm">Login</span>
+          {/* AUTH SECTION */}
+          <div className="flex items-center gap-4 border-x border-neutral-100 px-4 md:px-6">
+            {user ? (
+              <div className="flex items-center gap-4">
+                <Link to="/profile" className="flex items-center gap-2 group">
+                  <User size={18} strokeWidth={1.5} className="group-hover:text-amber-900 transition-colors" />
+                  <span className="hidden md:block text-[10px] uppercase font-bold tracking-widest text-black">
+                    {user.name?.split(' ')[0]}
+                  </span>
+                </Link>
+                <button 
+                  onClick={handleLogout} 
+                  className="text-neutral-400 hover:text-red-600 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut size={16} strokeWidth={1.5} />
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" className="text-black hover:text-amber-900 transition-colors">
+                <User size={18} strokeWidth={1.5} />
+              </Link>
+            )}
+            
+            {user?.role === "ADMIN" && (
+              <Link to="/admin/dashboard" className="text-amber-900 ml-2" title="Admin">
+                <LayoutDashboard size={18} strokeWidth={1.5} />
+              </Link>
+            )}
+          </div>
+
+          <NavLink to="/cart" className="relative hover:text-amber-900 transition-colors">
+            <ShoppingBag size={18} strokeWidth={1.5} />
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-amber-800 text-white text-[7px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                {cartCount}
+              </span>
+            )}
           </NavLink>
 
-          {/* CART */}
-          <NavLink to="/cart" className="relative text-black hover:text-rosegold transition hover:cursor-pointer" aria-label="Cart">
-            <ShoppingBag size={20} />
-            <span className="absolute -top-1 -right-1 bg-rosegold text-white text-[10px] rounded-full px-1.5">
-              0
-            </span>
-          </NavLink>
-
-          {/* MOBILE MENU */}
-          <button
-            className="md:hidden text-black"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {menuOpen ? <X /> : <Menu />}
+          <button className="lg:hidden flex items-center gap-2" onClick={() => {setMenuOpen(!menuOpen); setSearchOpen(false)}}>
+            {menuOpen ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
           </button>
         </div>
       </div>
 
-      {/* SEARCH BAR (OPEN / CLOSE) */}
+      {/* SEARCH & MOBILE MENU LOGIC STAYS THE SAME... */}
       <AnimatePresence>
         {searchOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className="border-t border-plum/10 bg-cream px-6 overflow-hidden"
-          >
-            <div className="max-w-7xl mx-auto py-4 flex items-center gap-3">
-              <Search size={18} className="text-black/60" />
-              <input
-                type="text"
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute top-20 left-0 w-full bg-white border-b border-neutral-100 p-6 z-[105] shadow-sm">
+            <form onSubmit={handleSearchSubmit} className="max-w-3xl mx-auto flex items-center gap-4">
+              <input 
+                autoFocus
+                placeholder="WHAT ARE YOU LOOKING FOR?"
+                className="w-full text-center text-sm font-bold tracking-widest uppercase outline-none"
                 value={query}
-                onChange={handleSearch}
-                placeholder="Search fashion, wigs, oils..."
-                className="w-full bg-transparent outline-none text-sm placeholder:text-black/40"
+                onChange={(e) => setQuery(e.target.value)}
               />
-              <button
-                onClick={() => setSearchOpen(false)}
-                className="text-sm text-rosegold"
-              >
-                Close
-              </button>
-            </div>
+              <button type="submit" className="hidden">Search</button>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* MOBILE MENU */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="md:hidden bg-cream border-t border-black/10 px-6 py-6 space-y-6"
-          >
-            <nav className="flex flex-col gap-4 text-black font-medium">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  onClick={() => setMenuOpen(false)}
-                  className="hover:text-rosegold transition"
-                >
-                  {link.name}
-                </Link>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 top-20 bg-white z-[100] lg:hidden flex flex-col overflow-y-auto">
+            <div className="flex flex-col p-8 pt-12 gap-8">
+              {navLinks.map((link, i) => (
+                <NavLink key={link.name} to={link.path} onClick={() => setMenuOpen(false)} className="group flex items-end gap-4">
+                  <span className="text-neutral-300 text-xs font-bold mb-2">0{i + 1}</span>
+                  <span className="text-4xl font-display uppercase tracking-tighter text-black group-hover:italic group-hover:text-amber-900 transition-all">{link.name}</span>
+                </NavLink>
               ))}
-            </nav>
-
-            <div className="flex gap-4">
-              <button className="flex-1 border border-plum py-3 text-black uppercase tracking-widest text-xs">
-                Login
-              </button>
-              <button className="flex-1 bg-black text-white py-3 uppercase tracking-widest text-xs">
-                Register
-              </button>
+              
+              {/* Added Profile/Logout to Mobile Menu for accessibility */}
+              <div className="mt-10 border-t border-neutral-100 pt-10 flex flex-col gap-6">
+                {user ? (
+                  <>
+                    <Link to="/profile" onClick={() => setMenuOpen(false)} className="text-xs uppercase font-bold tracking-widest">My Account</Link>
+                    <button onClick={handleLogout} className="text-xs uppercase font-bold tracking-widest text-red-500 text-left">Logout</button>
+                  </>
+                ) : (
+                  <Link to="/login" onClick={() => setMenuOpen(false)} className="text-xs uppercase font-bold tracking-widest">Sign In</Link>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
