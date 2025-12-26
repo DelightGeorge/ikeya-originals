@@ -21,6 +21,7 @@ import Dashboard from "./Pages/Admin/Dashboard";
 import AddProduct from "./Pages/Admin/AddProduct";
 import ProductDetail from "./Pages/ProductDetail";
 import Profile from "./Pages/Profile";
+import ResetPassword from "./Pages/ResetPassword";
 
 const router = createBrowserRouter([
   {
@@ -94,6 +95,10 @@ const router = createBrowserRouter([
             {
         path: "profile",
         element: <Profile />,
+      },
+                  {
+        path: "reset-password",
+        element: <ResetPassword />,
       },
     ],
   },
