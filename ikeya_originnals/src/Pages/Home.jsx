@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
+import api from "../services/api"; // Updated: Use central api instance instead of axios
+import { Link, useNavigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
-import { useCart } from "../Context/CartContext"; // Import useCart
+import { useCart } from "../Context/CartContext";
 import {
   Truck,
   ShieldCheck,
@@ -13,7 +13,7 @@ import {
   Scissors,
   ArrowRight,
   Loader2,
-  ShoppingBag, // Added ShoppingBag icon
+  ShoppingBag,
 } from "lucide-react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -28,7 +28,7 @@ const Home = () => {
   const [fashionProducts, setFashionProducts] = useState([]);
   const [beautyProducts, setBeautyProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { addToBag } = useCart(); // Access cart context
+  const { addToBag } = useCart();
   const navigate = useNavigate();
 
   const heroImages = [
@@ -40,9 +40,10 @@ const Home = () => {
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
+        // Updated: Using api.get and relative paths (baseUrl is handled in api.js)
         const [fashionRes, beautyRes] = await Promise.all([
-          axios.get("http://localhost:5000/products?type=FASHION&limit=4"),
-          axios.get("http://localhost:5000/products?type=BEAUTY&limit=2"),
+          api.get("/products?type=FASHION&limit=4"),
+          api.get("/products?type=BEAUTY&limit=2"),
         ]);
 
         setFashionProducts(fashionRes.data);
@@ -177,14 +178,12 @@ const Home = () => {
           {fashionProducts.map((p) => (
             <div key={p.id} className="group flex flex-col h-full">
               <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden mb-5">
-                {/* Clicking image navigates to product */}
                 <img
                   onClick={() => navigate(`/product/${p.id}`)}
                   src={p.imageUrl}
                   alt={p.name}
                   className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105 cursor-pointer"
                 />
-                {/* Re-integrated Add to Bag button */}
                 <button 
                   onClick={() => addToBag(p)}
                   className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
@@ -260,7 +259,6 @@ const Home = () => {
                     {formatPrice(p.price)}
                   </p>
                   
-                  {/* Action Buttons for Beauty Section */}
                   <div className="flex flex-col gap-3">
                     <button 
                       onClick={() => addToBag(p)}
@@ -282,8 +280,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ... (Philosophy, CTA, and Testimonials sections remain the same) ... */}
-      
       {/* ================= BRAND PHILOSOPHY ================= */}
       <section className="py-32 px-6 bg-white border-b border-neutral-100">
         <div className="max-w-6xl mx-auto">

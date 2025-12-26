@@ -8,8 +8,8 @@ import {
   ArrowRight,
   Loader2,
   CheckCircle2,
-  Eye,    // Added
-  EyeOff, // Added
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { login, register, forgotPassword } from "../services/authService"; 
 import { toast } from "react-hot-toast";
@@ -27,6 +27,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Redirect to the page they tried to visit, or default to /shop
   const from = location.state?.from?.pathname || "/shop";
 
   const [formData, setFormData] = useState({
@@ -60,7 +61,8 @@ const Auth = () => {
           password: formData.password,
         });
 
-        if (response?.requiresVerification) {
+        // Check if backend requires email verification (Magic Link or OTP)
+        if (response?.requiresVerification || response?.status === 'pending') {
           setEmailSent(true);
         } else {
           toast.success("Welcome back to the House.");
@@ -72,7 +74,13 @@ const Auth = () => {
         setEmailSent(true);
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "Something went wrong.";
+      // Improved error detection for Production/Render fallbacks
+      const errorMsg = 
+        err.response?.data?.message || 
+        (err.message === "Network Error" 
+          ? "The House is warming up. Please try again in a moment." 
+          : "An unexpected error occurred.");
+      
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -111,7 +119,7 @@ const Auth = () => {
             />
             <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex flex-col justify-end p-12 text-white">
               <span className="text-amber-500 uppercase tracking-[0.4em] text-[10px] font-bold mb-4 block">Membership</span>
-              <h2 className="text-4xl font-display font-bold uppercase tracking-tighter mb-6 leading-none">
+              <h2 className="text-4xl font-display font-bold uppercase tracking-tighter mb-6 leading-none whitespace-pre-line">
                 {isLogin ? "Welcome Back to \nOriginality." : "Start Your \nStyle Journey."}
               </h2>
               <p className="text-sm text-neutral-300 leading-relaxed font-light max-w-sm">
@@ -139,7 +147,7 @@ const Auth = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-center md:justify-start gap-3 text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
                     <CheckCircle2 size={14} className="text-amber-900" />
-                    Link expires in 24 hours
+                    Link expires shortly
                   </div>
                   <button
                     onClick={() => { setEmailSent(false); setIsLogin(true); setError(""); }}
@@ -161,7 +169,7 @@ const Auth = () => {
                 </div>
 
                 {error && (
-                  <div className="mb-6 p-4 bg-neutral-50 text-red-600 text-[10px] uppercase tracking-[0.2em] font-bold border-l border-red-600">
+                  <div className="mb-6 p-4 bg-neutral-50 text-red-600 text-[10px] uppercase tracking-[0.2em] font-bold border-l-2 border-red-600">
                     {error}
                   </div>
                 )}
@@ -219,7 +227,7 @@ const Auth = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-black transition-colors"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-black transition-colors px-2"
                       >
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
@@ -243,7 +251,7 @@ const Auth = () => {
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-0 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-black transition-colors"
+                          className="absolute right-0 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-black transition-colors px-2"
                         >
                           {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
@@ -253,7 +261,7 @@ const Auth = () => {
 
                   <button
                     type="submit" disabled={loading}
-                    className="w-full bg-black text-white py-5 uppercase text-[10px] font-bold tracking-[0.3em] hover:bg-amber-900 transition-all duration-500 flex items-center justify-center gap-3 group mt-10 disabled:bg-neutral-200 disabled:text-neutral-400"
+                    className="w-full bg-black text-white py-5 uppercase text-[10px] font-bold tracking-[0.3em] hover:bg-amber-900 transition-all duration-500 flex items-center justify-center gap-3 group mt-10 disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <Loader2 className="animate-spin" size={16} />
