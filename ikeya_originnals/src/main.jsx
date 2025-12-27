@@ -89,15 +89,15 @@ const router = createBrowserRouter([
         element: <AddProduct />,
       },
       {
-        path: "product/:id", // Dynamic route for single product
+        path: "/product/:id", // Dynamic route for single product
         element: <ProductDetail />,
       },
             {
-        path: "profile",
+        path: "/profile",
         element: <Profile />,
       },
                   {
-        path: "reset-password",
+        path: "/reset-password",
         element: <ResetPassword />,
       },
     ],
