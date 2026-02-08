@@ -74,7 +74,7 @@ const Dashboard = () => {
                 Admin <span className="text-amber-900 italic">Console</span>
               </h1>
               <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400 mt-2">
-                Managing Ikeyà Naturals & Fashion
+                Managing Ikeyá Naturals & Fashion
               </p>
             </div>
 
@@ -204,7 +204,7 @@ const Dashboard = () => {
               </div>
               <div className="mt-8 pt-8 border-t border-neutral-800">
                 <p className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
-                  Ikeyà Admin v1.0.4
+                   Ikeyá Admin v1.0.4
                 </p>
               </div>
             </div>

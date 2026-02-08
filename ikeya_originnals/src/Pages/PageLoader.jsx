@@ -12,7 +12,7 @@ const PageLoader = () => {
       <div className="flex flex-col items-center">
         {/* Elegant Logo Mark */}
         <h1 className="text-3xl font-display font-bold text-plum tracking-[0.3em] uppercase mb-4">
-          Ikeyà
+          Ikeyá Originals
         </h1>
         {/* The Spinner */}
         <SyncLoader color="#B76E79" size={10} margin={4} />
