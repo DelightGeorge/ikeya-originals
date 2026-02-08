@@ -13,7 +13,7 @@ const Footer = () => {
           <div className="space-y-6">
             <Link to="/" className="block">
               <h2 className="text-2xl font-display font-bold tracking-[0.2em] text-white uppercase">
-                Ikeyà <span className="text-rosegold italic">Originals</span>
+                 Ikeyá <span className="text-rosegold italic">Originals</span>
               </h2>
             </Link>
             <p className="text-sm leading-relaxed opacity-70 font-light max-w-xs">

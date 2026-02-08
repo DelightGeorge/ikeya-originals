@@ -72,7 +72,7 @@ const Home = () => {
         <div className="h-screen flex flex-col items-center justify-center bg-white">
           <Loader2 className="animate-spin text-amber-900 mb-4" size={32} />
           <p className="text-[10px] uppercase tracking-[0.4em] text-neutral-400 font-bold">
-            Entering the House of Ikeyà
+            Entering the House of  Ikeyá
           </p>
         </div>
       </Layout>
@@ -95,7 +95,7 @@ const Home = () => {
             <SwiperSlide key={i} className="w-full h-full">
               <img
                 src={src}
-                alt="Ikeyà Originals Brand Hero"
+                alt="Ikeyá Originals Brand Hero"
                 className="w-full h-full object-cover object-top md:object-center grayscale-[30%] brightness-75"
                 loading={i === 0 ? "eager" : "lazy"}
               />
@@ -106,7 +106,7 @@ const Home = () => {
         <div className="absolute inset-0 z-20 flex items-center justify-center text-center px-6">
           <div className="max-w-4xl mx-auto text-white">
             <h1 className="text-5xl md:text-8xl font-display font-bold mb-6 tracking-tight">
-              Ikeyà{" "}
+              Ikeyá{" "}
               <span className="text-white italic font-light underline decoration-amber-800 underline-offset-8">
                 Originals
               </span>
@@ -159,7 +159,7 @@ const Home = () => {
               Sub-Brand 01
             </span>
             <h2 className="text-4xl md:text-5xl font-display text-black font-bold uppercase tracking-tighter">
-              Ikeyà Designs
+              Ikeyá Designs
             </h2>
           </div>
           <Link
@@ -213,7 +213,7 @@ const Home = () => {
                 Sub-Brand 02
               </span>
               <h2 className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tighter mb-6 text-white">
-                Ikeyà Naturals
+                Ikeyá Naturals
               </h2>
               <p className="text-neutral-400 text-lg leading-relaxed font-light">
                 Premium botanical hair care. Formulated with earth-derived
@@ -300,7 +300,7 @@ const Home = () => {
                 <div className="flex items-center gap-4 text-amber-900">
                   <Scissors size={24} />
                   <h3 className="text-xl font-bold uppercase tracking-widest text-black">
-                    Ikeyà Designs
+                     Ikeyá Designs
                   </h3>
                 </div>
                 <p className="text-neutral-500 text-lg leading-relaxed border-l-2 border-neutral-100 pl-6">
@@ -313,7 +313,7 @@ const Home = () => {
                 <div className="flex items-center gap-4 text-amber-900">
                   <Heart size={24} />
                   <h3 className="text-xl font-bold uppercase tracking-widest text-black">
-                    Ikeyà Naturals
+                    Ikeyá Naturals
                   </h3>
                 </div>
                 <p className="text-neutral-500 text-lg leading-relaxed border-l-2 border-neutral-100 pl-6">
@@ -348,7 +348,7 @@ const Home = () => {
           {[
             {
               name: "Amina O.",
-              quote: "Ikeyà Designs is where I find pieces that represent my culture and my ambition.",
+              quote: "Ikeyá Designs is where I find pieces that represent my culture and my ambition.",
             },
             {
               name: "Deborah K.",
