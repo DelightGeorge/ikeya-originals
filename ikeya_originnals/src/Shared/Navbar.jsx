@@ -40,7 +40,7 @@ const Navbar = () => {
     <header className="fixed top-0 left-0 w-full z-[100] bg-white border-b border-neutral-100">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between bg-white relative z-[110]">
         <Link to="/" onClick={() => setMenuOpen(false)} className="font-display text-2xl font-bold text-black tracking-tighter uppercase">
-          Ikeyà
+          Ikeyá
         </Link>
 
         {/* DESKTOP LINKS */}
