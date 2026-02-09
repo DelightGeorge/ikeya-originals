@@ -22,6 +22,7 @@ import AddProduct from "./Pages/Admin/AddProduct";
 import ProductDetail from "./Pages/ProductDetail";
 import Profile from "./Pages/Profile";
 import ResetPassword from "./Pages/ResetPassword";
+import AdminUsers from "./Pages/AdminUsers";
 
 const router = createBrowserRouter([
   {
@@ -100,6 +101,11 @@ const router = createBrowserRouter([
         path: "/reset-password",
         element: <ResetPassword />,
       },
+                        {
+        path: "/admin/users",
+        element: <AdminUsers />,
+      },
+
     ],
   },
 ]);

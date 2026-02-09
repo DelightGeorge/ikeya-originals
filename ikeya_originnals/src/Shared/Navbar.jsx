@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Search, ShoppingBag, User, Menu, X, LayoutDashboard, LogOut } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, X, LayoutDashboard, LogOut, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../Context/CartContext";
 
@@ -82,10 +82,24 @@ const Navbar = () => {
               </Link>
             )}
             
+            {/* ADMIN LINKS - Desktop */}
             {user?.role === "ADMIN" && (
-              <Link to="/admin/dashboard" className="text-amber-900 ml-2" title="Admin">
-                <LayoutDashboard size={18} strokeWidth={1.5} />
-              </Link>
+              <div className="hidden md:flex items-center gap-2 ml-2">
+                <Link 
+                  to="/admin/dashboard" 
+                  className="text-amber-900 hover:text-amber-700 transition-colors" 
+                  title="Dashboard"
+                >
+                  <LayoutDashboard size={18} strokeWidth={1.5} />
+                </Link>
+                <Link 
+                  to="/admin/users" 
+                  className="text-amber-900 hover:text-amber-700 transition-colors" 
+                  title="View All Users"
+                >
+                  <Users size={18} strokeWidth={1.5} />
+                </Link>
+              </div>
             )}
           </div>
 
@@ -104,7 +118,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* SEARCH & MOBILE MENU LOGIC STAYS THE SAME... */}
+      {/* SEARCH BAR */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute top-20 left-0 w-full bg-white border-b border-neutral-100 p-6 z-[105] shadow-sm">
@@ -122,6 +136,7 @@ const Navbar = () => {
         )}
       </AnimatePresence>
 
+      {/* MOBILE MENU */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 top-20 bg-white z-[100] lg:hidden flex flex-col overflow-y-auto">
@@ -133,15 +148,45 @@ const Navbar = () => {
                 </NavLink>
               ))}
               
-              {/* Added Profile/Logout to Mobile Menu for accessibility */}
+              {/* User Menu Section */}
               <div className="mt-10 border-t border-neutral-100 pt-10 flex flex-col gap-6">
                 {user ? (
                   <>
-                    <Link to="/profile" onClick={() => setMenuOpen(false)} className="text-xs uppercase font-bold tracking-widest">My Account</Link>
-                    <button onClick={handleLogout} className="text-xs uppercase font-bold tracking-widest text-red-500 text-left">Logout</button>
+                    <Link to="/profile" onClick={() => setMenuOpen(false)} className="text-xs uppercase font-bold tracking-widest">
+                      My Account
+                    </Link>
+                    
+                    {/* Admin Links - Mobile */}
+                    {user.role === "ADMIN" && (
+                      <div className="flex flex-col gap-4 pl-4 border-l-2 border-amber-800">
+                        <span className="text-[8px] uppercase tracking-[0.3em] text-amber-800 font-bold">Admin</span>
+                        <Link 
+                          to="/admin/dashboard" 
+                          onClick={() => setMenuOpen(false)} 
+                          className="flex items-center gap-2 text-xs uppercase font-bold tracking-widest text-black hover:text-amber-900"
+                        >
+                          <LayoutDashboard size={14} />
+                          Dashboard
+                        </Link>
+                        <Link 
+                          to="/admin/users" 
+                          onClick={() => setMenuOpen(false)} 
+                          className="flex items-center gap-2 text-xs uppercase font-bold tracking-widest text-black hover:text-amber-900"
+                        >
+                          <Users size={14} />
+                          All Users
+                        </Link>
+                      </div>
+                    )}
+                    
+                    <button onClick={handleLogout} className="text-xs uppercase font-bold tracking-widest text-red-500 text-left">
+                      Logout
+                    </button>
                   </>
                 ) : (
-                  <Link to="/login" onClick={() => setMenuOpen(false)} className="text-xs uppercase font-bold tracking-widest">Sign In</Link>
+                  <Link to="/login" onClick={() => setMenuOpen(false)} className="text-xs uppercase font-bold tracking-widest">
+                    Sign In
+                  </Link>
                 )}
               </div>
             </div>
