@@ -7,13 +7,7 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartCount, setCartCount] = useState(0);
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
-
-  useEffect(() => {
-    const syncToken = () => setToken(localStorage.getItem("token"));
-    window.addEventListener("storage", syncToken);
-    return () => window.removeEventListener("storage", syncToken);
-  }, []);
+  const token = localStorage.getItem("token");
 
   const fetchCart = async () => {
     if (!token) {
@@ -22,18 +16,45 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    const res = await api.get("/cart");
-    const items = res.data || [];
-    setCartItems(items);
-    setCartCount(items.reduce((a, i) => a + i.quantity, 0));
+    try {
+      const res = await api.get("/cart");
+      const items = Array.isArray(res.data) ? res.data : [];
+      setCartItems(items);
+      setCartCount(items.reduce((sum, i) => sum + i.quantity, 0));
+    } catch (err) {
+      console.error("Fetch cart failed");
+    }
   };
 
-  const addToBag = async (product) => {
+  const addToBag = async (productId, quantity = 1) => {
     if (!token) return toast.error("Please login");
 
-    await api.post("/cart", { productId: product.id, quantity: 1 });
-    toast.success("Added to bag");
-    fetchCart();
+    try {
+      await api.post("/cart", { productId, quantity });
+      toast.success("Added to bag");
+      fetchCart();
+    } catch (err) {
+      toast.error("Could not add to bag");
+    }
+  };
+
+  const updateQuantity = async (itemId, quantity) => {
+    try {
+      await api.patch(`/cart/${itemId}`, { quantity });
+      fetchCart();
+    } catch {
+      toast.error("Could not update quantity");
+    }
+  };
+
+  const removeItem = async (itemId) => {
+    try {
+      await api.delete(`/cart/${itemId}`);
+      toast.success("Removed from bag");
+      fetchCart();
+    } catch {
+      toast.error("Could not remove item");
+    }
   };
 
   useEffect(() => {
@@ -41,7 +62,15 @@ export const CartProvider = ({ children }) => {
   }, [token]);
 
   return (
-    <CartContext.Provider value={{ cartItems, cartCount, addToBag }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        cartCount,
+        addToBag,
+        updateQuantity,
+        removeItem,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
