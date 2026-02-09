@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import Layout from "../../Shared/Layout/Layout";
 import {
   Plus,
@@ -92,7 +92,7 @@ const Dashboard = () => {
               { label: "Total Revenue", value: stats.revenue, icon: TrendingUp },
               { label: "Products", value: stats.products, icon: Package },
               { label: "Orders", value: stats.orders, icon: ShoppingCart },
-              { label: "Customers", value: stats.customers, icon: Users },
+              { label: "Customers", value: stats.customers, icon: Users, NavLink : "/admin/users" },
             ].map((stat, i) => (
               <div
                 key={i}
