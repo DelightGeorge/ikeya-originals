@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api"; // ✅ Changed from axios to api
 import Layout from "../Shared/Layout/Layout";
 import { useCart } from "../Context/CartContext";
 import {
@@ -26,7 +26,7 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:5000/products/${id}`);
+        const res = await api.get(`/products/${id}`); // ✅ Changed to use api instead of axios
         setProduct(res.data);
       } catch (err) {
         console.error("Error fetching product:", err);
