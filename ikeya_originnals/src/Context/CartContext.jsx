@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+import { createContext, useContext, useEffect, useState } from "react";
+import api from "../services/api";
 import { toast } from "react-hot-toast";
 
 const CartContext = createContext();
@@ -7,55 +7,41 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartCount, setCartCount] = useState(0);
-  const token = localStorage.getItem("token");
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
+
+  useEffect(() => {
+    const syncToken = () => setToken(localStorage.getItem("token"));
+    window.addEventListener("storage", syncToken);
+    return () => window.removeEventListener("storage", syncToken);
+  }, []);
 
   const fetchCart = async () => {
     if (!token) {
+      setCartItems([]);
       setCartCount(0);
       return;
     }
-    try {
-      const res = await axios.get("http://localhost:5000/cart", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const items = Array.isArray(res.data) ? res.data : [];
-      setCartItems(items);
-      const totalQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
-      setCartCount(totalQuantity);
-    } catch (err) {
-      console.error("Cart fetch error", err);
-    }
+
+    const res = await api.get("/cart");
+    const items = res.data || [];
+    setCartItems(items);
+    setCartCount(items.reduce((a, i) => a + i.quantity, 0));
+  };
+
+  const addToBag = async (product) => {
+    if (!token) return toast.error("Please login");
+
+    await api.post("/cart", { productId: product.id, quantity: 1 });
+    toast.success("Added to bag");
+    fetchCart();
   };
 
   useEffect(() => {
     fetchCart();
   }, [token]);
 
-  const addToBag = async (product) => {
-    if (!token) {
-      toast.error("Please login to shop", { style: { borderRadius: '0', background: '#000', color: '#fff', fontSize: '10px', letterSpacing: '0.1em' } });
-      return;
-    }
-
-    try {
-      await axios.post(
-        "http://localhost:5000/cart",
-        { productId: product.id, quantity: 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      toast.success(`${product.name.toUpperCase()} ADDED TO BAG`, {
-        style: { borderRadius: '0', background: '#000', color: '#fff', fontSize: '10px', letterSpacing: '0.1em' }
-      });
-      
-      fetchCart(); // This triggers the Navbar update
-    } catch (err) {
-      toast.error("COULD NOT ADD TO BAG");
-    }
-  };
-
   return (
-    <CartContext.Provider value={{ cartItems, cartCount, addToBag, refreshCart: fetchCart }}>
+    <CartContext.Provider value={{ cartItems, cartCount, addToBag }}>
       {children}
     </CartContext.Provider>
   );
