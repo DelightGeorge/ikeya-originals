@@ -7,7 +7,13 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartCount, setCartCount] = useState(0);
-  const token = localStorage.getItem("token");
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
+
+  useEffect(() => {
+    const syncToken = () => setToken(localStorage.getItem("token"));
+    window.addEventListener("storage", syncToken);
+    return () => window.removeEventListener("storage", syncToken);
+  }, []);
 
   const fetchCart = async () => {
     if (!token) {
@@ -18,15 +24,16 @@ export const CartProvider = ({ children }) => {
 
     try {
       const res = await api.get("/cart");
-      const items = Array.isArray(res.data) ? res.data : [];
+      const items = res.data || [];
       setCartItems(items);
-      setCartCount(items.reduce((sum, i) => sum + i.quantity, 0));
+      setCartCount(items.reduce((a, i) => a + i.quantity, 0));
     } catch (err) {
-      console.error("Fetch cart failed");
+      setCartItems([]);
+      setCartCount(0);
     }
   };
 
-  const addToBag = async (productId, quantity = 1) => {
+  const addToBag = async ({ productId, quantity }) => {
     if (!token) return toast.error("Please login");
 
     try {
@@ -39,20 +46,26 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateQuantity = async (itemId, quantity) => {
+    if (!token) return;
+
     try {
       await api.patch(`/cart/${itemId}`, { quantity });
-      fetchCart();
-    } catch {
+      setCartItems((prev) =>
+        prev.map((i) => (i.id === itemId ? { ...i, quantity } : i))
+      );
+    } catch (err) {
       toast.error("Could not update quantity");
     }
   };
 
   const removeItem = async (itemId) => {
+    if (!token) return;
+
     try {
       await api.delete(`/cart/${itemId}`);
+      setCartItems((prev) => prev.filter((i) => i.id !== itemId));
       toast.success("Removed from bag");
-      fetchCart();
-    } catch {
+    } catch (err) {
       toast.error("Could not remove item");
     }
   };
@@ -67,6 +80,7 @@ export const CartProvider = ({ children }) => {
         cartItems,
         cartCount,
         addToBag,
+        fetchCart,
         updateQuantity,
         removeItem,
       }}

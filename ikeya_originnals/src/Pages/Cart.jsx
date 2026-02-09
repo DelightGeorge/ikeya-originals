@@ -11,17 +11,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../Context/CartContext";
 
 const Cart = () => {
-  const {
-    cartItems,
-    updateQuantity,
-    removeItem,
-  } = useCart();
-
+  const { cartItems, updateQuantity, removeItem } = useCart();
   const navigate = useNavigate();
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + (item.product?.price || 0) * item.quantity,
-    0
+    0,
   );
 
   const formatMoney = (kobo) => `₦${(kobo / 100).toLocaleString()}`;
@@ -55,6 +50,7 @@ const Cart = () => {
                   key={item.id}
                   className="flex gap-8 pb-10 border-b border-neutral-100 items-center"
                 >
+                  {/* Product Image */}
                   <div className="w-24 h-32 bg-neutral-50 overflow-hidden">
                     <img
                       src={item.product?.imageUrl}
@@ -63,11 +59,12 @@ const Cart = () => {
                     />
                   </div>
 
+                  {/* Product Info */}
                   <div className="flex-1 space-y-4">
                     <div className="flex justify-between">
                       <div>
                         <p className="text-[10px] uppercase text-amber-900 font-bold tracking-[0.2em] mb-1">
-                          {item.product?.type}
+                          {item.product?.type} / {item.product?.category?.name}
                         </p>
                         <h3 className="text-sm font-bold uppercase tracking-widest">
                           {item.product?.name}
@@ -78,11 +75,15 @@ const Cart = () => {
                       </p>
                     </div>
 
+                    {/* Quantity Selector and Remove */}
                     <div className="flex justify-between items-center pt-4">
                       <div className="flex items-center border border-neutral-200">
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, Math.max(1, item.quantity - 1))
+                            updateQuantity(
+                              item.id,
+                              Math.max(1, item.quantity - 1),
+                            )
                           }
                           className="p-2 hover:bg-neutral-50"
                         >
@@ -115,6 +116,7 @@ const Cart = () => {
               ))}
             </div>
 
+            {/* Summary */}
             <div className="lg:col-span-1">
               <div className="bg-neutral-50 p-8 border border-neutral-100 sticky top-32">
                 <h2 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-amber-900">

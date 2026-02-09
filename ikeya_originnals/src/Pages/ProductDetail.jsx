@@ -26,7 +26,6 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        // Ensure this matches your backend route for a single product
         const res = await axios.get(`http://localhost:5000/products/${id}`);
         setProduct(res.data);
       } catch (err) {
@@ -38,15 +37,14 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  const formatPrice = (priceInKobo) => {
-    return new Intl.NumberFormat("en-NG", {
+  const formatPrice = (priceInKobo) =>
+    new Intl.NumberFormat("en-NG", {
       style: "currency",
       currency: "NGN",
       minimumFractionDigits: 0,
     }).format(priceInKobo / 100);
-  };
 
-  if (loading) {
+  if (loading)
     return (
       <Layout>
         <div className="h-[70vh] flex flex-col items-center justify-center">
@@ -57,9 +55,8 @@ const ProductDetail = () => {
         </div>
       </Layout>
     );
-  }
 
-  if (!product) {
+  if (!product)
     return (
       <Layout>
         <div className="h-[70vh] flex flex-col items-center justify-center text-center px-6">
@@ -75,7 +72,6 @@ const ProductDetail = () => {
         </div>
       </Layout>
     );
-  }
 
   return (
     <Layout>
@@ -94,7 +90,7 @@ const ProductDetail = () => {
         </nav>
 
         <div className="grid lg:grid-cols-2 gap-16 items-start">
-          {/* LEFT: Image Gallery */}
+          {/* LEFT: Image */}
           <div className="space-y-4">
             <div className="aspect-[3/4] bg-neutral-100 overflow-hidden">
               <img
@@ -103,7 +99,6 @@ const ProductDetail = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            {/* You can map additional images here if your schema supports them */}
           </div>
 
           {/* RIGHT: Product Info */}
@@ -144,10 +139,10 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* Actions */}
+            {/* Add to Bag Button */}
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <button
-                onClick={() => addToBag(product.id, quantity)}
+                onClick={() => addToBag({ productId: product.id, quantity })}
                 className="grow bg-black text-white py-5 px-8 uppercase text-[10px] font-bold tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-amber-900 transition-all duration-500"
               >
                 <ShoppingBag size={16} /> Add to Bag
@@ -176,7 +171,7 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* Tabs (Description/Details) */}
+            {/* Tabs */}
             <div className="space-y-6">
               <div className="flex gap-8 border-b border-neutral-100">
                 {["description", "details"].map((tab) => (
