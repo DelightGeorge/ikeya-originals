@@ -28,7 +28,7 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/users"); // You'll need to create this endpoint
+      const response = await api.get("/users"); // ✅ Endpoint: /users
       setUsers(response.data);
     } catch (err) {
       setError("Failed to fetch users");
@@ -38,7 +38,6 @@ const AdminUsers = () => {
     }
   };
 
-  // Filter users based on search query and role filter
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       !searchQuery ||
@@ -75,7 +74,6 @@ const AdminUsers = () => {
   return (
     <Layout>
       <div className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
-        {/* Header */}
         <header className="mb-12">
           <div className="flex items-center gap-3 mb-4">
             <Users className="text-amber-800" size={32} />
@@ -88,7 +86,6 @@ const AdminUsers = () => {
           </p>
         </header>
 
-        {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-neutral-50 p-6 border border-neutral-100">
             <div className="flex items-center justify-between mb-2">
@@ -127,9 +124,7 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        {/* Search and Filter Bar */}
         <div className="flex flex-col md:flex-row gap-4 mb-8 pb-6 border-b border-neutral-100">
-          {/* Search Input */}
           <div className="relative flex-1">
             <Search
               size={16}
@@ -152,7 +147,6 @@ const AdminUsers = () => {
             )}
           </div>
 
-          {/* Role Filter */}
           <div className="flex gap-4 items-center">
             <Filter size={16} className="text-amber-800" />
             <div className="flex gap-2">
@@ -173,14 +167,12 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
             {filteredUsers.length} {filteredUsers.length === 1 ? "User" : "Users"} Found
           </p>
         </div>
 
-        {/* Error State */}
         {error && (
           <div className="flex items-center gap-3 bg-red-50 border border-red-200 p-4 mb-6">
             <AlertCircle size={18} className="text-red-500" />
@@ -188,7 +180,6 @@ const AdminUsers = () => {
           </div>
         )}
 
-        {/* Users Table */}
         {filteredUsers.length === 0 ? (
           <div className="text-center py-20 bg-neutral-50 border border-neutral-100">
             <Users size={48} className="mx-auto mb-4 text-neutral-300" />
@@ -198,38 +189,24 @@ const AdminUsers = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            {/* Desktop Table View */}
             <table className="w-full hidden md:table">
               <thead>
                 <tr className="border-b-2 border-black">
-                  <th className="text-left py-4 px-4 text-[10px] uppercase tracking-[0.3em] font-bold text-black">
-                    User
-                  </th>
-                  <th className="text-left py-4 px-4 text-[10px] uppercase tracking-[0.3em] font-bold text-black">
-                    Email
-                  </th>
-                  <th className="text-left py-4 px-4 text-[10px] uppercase tracking-[0.3em] font-bold text-black">
-                    Role
-                  </th>
-                  <th className="text-left py-4 px-4 text-[10px] uppercase tracking-[0.3em] font-bold text-black">
-                    Joined
-                  </th>
+                  <th className="text-left py-4 px-4 text-[10px] uppercase tracking-[0.3em] font-bold text-black">User</th>
+                  <th className="text-left py-4 px-4 text-[10px] uppercase tracking-[0.3em] font-bold text-black">Email</th>
+                  <th className="text-left py-4 px-4 text-[10px] uppercase tracking-[0.3em] font-bold text-black">Role</th>
+                  <th className="text-left py-4 px-4 text-[10px] uppercase tracking-[0.3em] font-bold text-black">Joined</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors"
-                  >
+                  <tr key={user.id} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
                           <User size={18} className="text-amber-800" />
                         </div>
-                        <span className="font-medium text-sm text-black">
-                          {user.name || "No Name"}
-                        </span>
+                        <span className="font-medium text-sm text-black">{user.name || "No Name"}</span>
                       </div>
                     </td>
                     <td className="py-4 px-4">
@@ -239,13 +216,7 @@ const AdminUsers = () => {
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span
-                        className={`inline-block px-3 py-1 text-[9px] uppercase tracking-widest font-bold ${
-                          user.role === "ADMIN"
-                            ? "bg-amber-800 text-white"
-                            : "bg-neutral-200 text-black"
-                        }`}
-                      >
+                      <span className={`inline-block px-3 py-1 text-[9px] uppercase tracking-widest font-bold ${user.role === "ADMIN" ? "bg-amber-800 text-white" : "bg-neutral-200 text-black"}`}>
                         {user.role}
                       </span>
                     </td>
@@ -260,35 +231,22 @@ const AdminUsers = () => {
               </tbody>
             </table>
 
-            {/* Mobile Card View */}
             <div className="md:hidden space-y-4">
               {filteredUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="bg-white border border-neutral-200 p-4 space-y-3"
-                >
+                <div key={user.id} className="bg-white border border-neutral-200 p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
                         <User size={20} className="text-amber-800" />
                       </div>
                       <div>
-                        <p className="font-bold text-sm text-black">
-                          {user.name || "No Name"}
-                        </p>
-                        <span
-                          className={`inline-block px-2 py-1 text-[8px] uppercase tracking-widest font-bold mt-1 ${
-                            user.role === "ADMIN"
-                              ? "bg-amber-800 text-white"
-                              : "bg-neutral-200 text-black"
-                          }`}
-                        >
+                        <p className="font-bold text-sm text-black">{user.name || "No Name"}</p>
+                        <span className={`inline-block px-2 py-1 text-[8px] uppercase tracking-widest font-bold mt-1 ${user.role === "ADMIN" ? "bg-amber-800 text-white" : "bg-neutral-200 text-black"}`}>
                           {user.role}
                         </span>
                       </div>
                     </div>
                   </div>
-
                   <div className="space-y-2 pt-3 border-t border-neutral-100">
                     <div className="flex items-center gap-2 text-neutral-600 text-xs">
                       <Mail size={12} className="text-neutral-400" />
