@@ -18,19 +18,19 @@ const formatPrice = (kobo) =>
   }).format(kobo / 100);
 
 const Cart = () => {
-  const { cartItems, updateQuantity, removeItem } = useCart();
+  // ✅ FIXED: Use correct destructuring - it's 'cart' not 'cartItems'
+  const { cart, loading, updateQuantity, removeFromCart, cartTotal } = useCart();
   const navigate = useNavigate();
 
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + (item.product?.price || 0) * item.quantity,
-    0
-  );
+  // ✅ FIXED: Use cartTotal from context instead of calculating here
+  const subtotal = cartTotal;
 
   const handleProceedToCheckout = () => {
-    navigate("/checkout", { state: { items: cartItems, subtotal } });
+    navigate("/checkout", { state: { items: cart, subtotal } });
   };
 
-  if (!cartItems) {
+  // ✅ Show loading state
+  if (loading) {
     return (
       <Layout>
         <div className="h-screen flex items-center justify-center bg-white">
@@ -47,10 +47,12 @@ const Cart = () => {
           Your Bag
         </h1>
 
-        {cartItems.length > 0 ? (
+        {/* ✅ FIXED: Check cart.length instead of cartItems.length */}
+        {cart && cart.length > 0 ? (
           <div className="grid lg:grid-cols-3 gap-16">
             <div className="lg:col-span-2 space-y-10">
-              {cartItems.map((item) => (
+              {/* ✅ FIXED: Map over 'cart' instead of 'cartItems' */}
+              {cart.map((item) => (
                 <div
                   key={item.id}
                   className="flex gap-8 pb-10 border-b border-neutral-100 items-center"
@@ -109,8 +111,9 @@ const Cart = () => {
                         </button>
                       </div>
 
+                      {/* ✅ FIXED: Use removeFromCart instead of removeItem */}
                       <button
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeFromCart(item.id)}
                         className="text-[10px] uppercase font-bold text-neutral-400 hover:text-red-600 transition flex items-center gap-2"
                       >
                         <Trash2 size={12} /> Remove
