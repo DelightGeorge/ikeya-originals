@@ -28,7 +28,8 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/users"); // ✅ Endpoint: /users
+      // ✅ FIXED: updated endpoint to match backend
+      const response = await api.get("/auth/users");
       setUsers(response.data);
     } catch (err) {
       setError("Failed to fetch users");
