@@ -30,10 +30,11 @@ export const CartProvider = ({ children }) => {
       }
 
       const response = await api.get("/cart");
-      setCart(response.data || []);
+      // Ensure we always set an array
+      setCart(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error("Error fetching cart:", err);
-      setCart([]);
+      setCart([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -101,24 +102,28 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     try {
       // Remove each item
-      await Promise.all(cart.map((item) => api.delete(`/cart/${item.id}`)));
+      if (cart && cart.length > 0) {
+        await Promise.all(cart.map((item) => api.delete(`/cart/${item.id}`)));
+      }
       setCart([]);
     } catch (err) {
       console.error("Error clearing cart:", err);
     }
   };
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  // FIXED: Always ensure cart is an array before using reduce
+  const cartCount = (cart && Array.isArray(cart)) 
+    ? cart.reduce((sum, item) => sum + (item.quantity || 0), 0)
+    : 0;
 
-  const cartTotal = cart.reduce(
-    (sum, item) => sum + (item.product?.price || 0) * item.quantity,
-    0
-  );
+  const cartTotal = (cart && Array.isArray(cart))
+    ? cart.reduce((sum, item) => sum + ((item.product?.price || 0) * (item.quantity || 0)), 0)
+    : 0;
 
   return (
     <CartContext.Provider
       value={{
-        cart,
+        cart: cart || [], // Always provide an array
         loading,
         addToBag,
         updateQuantity,
