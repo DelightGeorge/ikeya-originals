@@ -70,6 +70,10 @@ const router = createBrowserRouter([
         element: <Cart />,
       },
       {
+        path: "/auth",
+        element: <Auth />,
+      },
+      {
         path: "/checkout",
         element: <Checkout />,
       },
@@ -93,24 +97,23 @@ const router = createBrowserRouter([
         path: "/product/:id", // Dynamic route for single product
         element: <ProductDetail />,
       },
-            {
+      {
         path: "/profile",
         element: <Profile />,
       },
-                  {
+      {
         path: "/reset-password",
         element: <ResetPassword />,
       },
-                        {
+      {
         path: "/admin/users",
         element: <AdminUsers />,
       },
-
     ],
   },
 ]);
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>
+  </StrictMode>,
 );
