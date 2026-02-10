@@ -21,8 +21,15 @@ const Dashboard = () => {
     products: 0,
     orders: 0,
     customers: 0,
-    revenue: "₦0.00",
+    revenue: 0,
   });
+
+  const formatPrice = (priceInKobo) =>
+    new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+    }).format(priceInKobo / 100);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -37,6 +44,10 @@ const Dashboard = () => {
         setStats((prev) => ({
           ...prev,
           products: fetchedProducts.length,
+          revenue: fetchedProducts.reduce(
+            (sum, p) => sum + (p.price || 0),
+            0
+          ),
         }));
       } catch (err) {
         console.error("Error loading dashboard:", err);
@@ -52,7 +63,6 @@ const Dashboard = () => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         await api.delete(`/products/${id}`);
-        // Optimistic UI update
         const updatedProducts = recentProducts.filter((p) => p.id !== id);
         setRecentProducts(updatedProducts);
         setStats((prev) => ({ ...prev, products: updatedProducts.length }));
@@ -89,10 +99,14 @@ const Dashboard = () => {
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {[
-              { label: "Total Revenue", value: stats.revenue, icon: TrendingUp },
+              {
+                label: "Total Revenue",
+                value: formatPrice(stats.revenue),
+                icon: TrendingUp,
+              },
               { label: "Products", value: stats.products, icon: Package },
               { label: "Orders", value: stats.orders, icon: ShoppingCart },
-              { label: "Customers", value: stats.customers, icon: Users, NavLink : "/admin/users" },
+              { label: "Customers", value: stats.customers, icon: Users },
             ].map((stat, i) => (
               <div
                 key={i}
@@ -111,7 +125,7 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {/* Activity Section */}
+          {/* Recent Products */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 bg-white border border-neutral-100 p-8 min-h-[400px]">
               <h3 className="text-xs uppercase tracking-widest font-bold mb-8 flex items-center gap-2">
@@ -135,7 +149,8 @@ const Dashboard = () => {
                           alt={product.name}
                           className="w-14 h-14 object-cover border border-neutral-100 bg-neutral-50"
                           onError={(e) => {
-                            e.target.src = "https://placehold.co/100x100?text=Product";
+                            e.target.src =
+                              "https://placehold.co/100x100?text=Product";
                           }}
                         />
                         <div>
@@ -151,13 +166,13 @@ const Dashboard = () => {
                       <div className="flex items-center gap-8">
                         <div className="text-right">
                           <p className="text-sm font-display font-bold text-black">
-                            ₦{Number(product.price).toLocaleString()}
+                            {formatPrice(product.price)}
                           </p>
                           <p className="text-[9px] text-green-600 uppercase font-bold tracking-tighter">
                             In Stock
                           </p>
                         </div>
-                        
+
                         {/* DELETE BUTTON */}
                         <button
                           onClick={() => handleDelete(product.id)}
@@ -179,7 +194,7 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Side Alert Panel */}
+            {/* Side Panel */}
             <div className="bg-black text-white p-8 flex flex-col">
               <h3 className="text-xs uppercase tracking-widest font-bold mb-8 text-amber-500">
                 Inventory Alerts
@@ -204,7 +219,7 @@ const Dashboard = () => {
               </div>
               <div className="mt-8 pt-8 border-t border-neutral-800">
                 <p className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
-                   Ikeyá Admin v1.0.4
+                  Ikeyá Admin v1.0.4
                 </p>
               </div>
             </div>

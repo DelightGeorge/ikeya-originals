@@ -10,16 +10,21 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../Context/CartContext";
 
+const formatPrice = (kobo) =>
+  new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    minimumFractionDigits: 0,
+  }).format(kobo / 100);
+
 const Cart = () => {
   const { cartItems, updateQuantity, removeItem } = useCart();
   const navigate = useNavigate();
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + (item.product?.price || 0) * item.quantity,
-    0,
+    0
   );
-
-  const formatMoney = (kobo) => `₦${(kobo / 100).toLocaleString()}`;
 
   const handleProceedToCheckout = () => {
     navigate("/checkout", { state: { items: cartItems, subtotal } });
@@ -71,7 +76,7 @@ const Cart = () => {
                         </h3>
                       </div>
                       <p className="font-bold text-sm">
-                        {formatMoney(item.product?.price * item.quantity)}
+                        {formatPrice(item.product?.price * item.quantity)}
                       </p>
                     </div>
 
@@ -82,7 +87,7 @@ const Cart = () => {
                           onClick={() =>
                             updateQuantity(
                               item.id,
-                              Math.max(1, item.quantity - 1),
+                              Math.max(1, item.quantity - 1)
                             )
                           }
                           className="p-2 hover:bg-neutral-50"
@@ -126,7 +131,7 @@ const Cart = () => {
                 <div className="space-y-4 text-xs font-medium uppercase tracking-widest border-b border-neutral-200 pb-6 mb-6">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>{formatMoney(subtotal)}</span>
+                    <span>{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-neutral-400">
                     <span>Shipping</span>
@@ -136,7 +141,7 @@ const Cart = () => {
 
                 <div className="flex justify-between font-bold text-lg mb-8 uppercase tracking-tighter">
                   <span>Total</span>
-                  <span>{formatMoney(subtotal)}</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
 
                 <button

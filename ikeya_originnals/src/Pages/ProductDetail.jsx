@@ -22,11 +22,18 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
 
+  const formatPrice = (priceInKobo) =>
+    new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+    }).format(priceInKobo / 100);
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await api.get(`/products/${id}`); // ✅ Changed to use api instead of axios
+        const res = await api.get(`/products/${id}`);
         setProduct(res.data);
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -36,13 +43,6 @@ const ProductDetail = () => {
     };
     fetchProduct();
   }, [id]);
-
-  const formatPrice = (priceInKobo) =>
-    new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-      minimumFractionDigits: 0,
-    }).format(priceInKobo / 100);
 
   if (loading)
     return (
