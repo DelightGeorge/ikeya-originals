@@ -1,12 +1,6 @@
 import { useState } from "react";
 import Layout from "../../Shared/Layout/Layout";
-import {
-  ArrowLeft,
-  Loader2,
-  Check,
-  X,
-  Image as ImageIcon,
-} from "lucide-react";
+import { ArrowLeft, Loader2, Check, X, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
@@ -40,25 +34,36 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Basic frontend validation
+    if (!formData.name || !formData.category || !formData.price || !formData.description) {
+      return alert("Please fill in all fields");
+    }
     if (!imageFile) return alert("Please upload an image");
+
+    const parsedPrice = Number(formData.price);
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      return alert("Invalid price");
+    }
 
     setLoading(true);
 
-    const data = new FormData();
-    data.append("name", formData.name);
-    data.append("description", formData.description);
-    data.append("price", formData.price);
-    data.append("type", formData.type);
-    data.append("category", formData.category);
-    data.append("image", imageFile);
-
     try {
-      await api.post("/products/add", data);
+      const data = new FormData();
+      data.append("name", formData.name);
+      data.append("description", formData.description);
+      data.append("price", parsedPrice); // send as number
+      data.append("type", formData.type);
+      data.append("category", formData.category);
+      data.append("image", imageFile);
+
+      await api.post("/products/add", data); // backend endpoint
       setSuccess(true);
+
       setTimeout(() => navigate("/admin/dashboard"), 1500);
     } catch (err) {
-      console.error(err);
-      alert("Failed to add product");
+      console.error("Add Product Error:", err);
+      alert(err?.response?.data?.message || "Failed to add product");
     } finally {
       setLoading(false);
     }
@@ -104,14 +109,12 @@ const AddProduct = () => {
                   className="w-full border-b p-2"
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
-
                 <input
                   required
                   placeholder="Category (e.g. Kaftans)"
                   className="w-full border-b p-2"
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 />
-
                 <select
                   className="w-full border-b p-2"
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
@@ -119,7 +122,6 @@ const AddProduct = () => {
                   <option value="FASHION">Fashion</option>
                   <option value="BEAUTY">Beauty</option>
                 </select>
-
                 <input
                   type="number"
                   required
@@ -127,14 +129,11 @@ const AddProduct = () => {
                   className="w-full border-b p-2"
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 />
-
                 <textarea
                   required
                   placeholder="Description"
                   className="w-full border p-3"
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
 
                 <button
