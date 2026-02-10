@@ -12,10 +12,10 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
+  // ✅ ALWAYS initialize as empty array
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch cart on mount
   useEffect(() => {
     fetchCart();
   }, []);
@@ -30,11 +30,14 @@ export const CartProvider = ({ children }) => {
       }
 
       const response = await api.get("/cart");
-      // Ensure we always set an array
-      setCart(Array.isArray(response.data) ? response.data : []);
+      
+      // ✅ ALWAYS ensure we set an array
+      const cartData = response.data;
+      setCart(Array.isArray(cartData) ? cartData : []);
+      
     } catch (err) {
       console.error("Error fetching cart:", err);
-      setCart([]); // Set empty array on error
+      setCart([]); // ✅ Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -57,7 +60,6 @@ export const CartProvider = ({ children }) => {
       // Refresh cart after adding
       await fetchCart();
       
-      // Optional: Show success feedback
       alert("Item added to cart!");
       
       return response.data;
@@ -101,8 +103,8 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     try {
-      // Remove each item
-      if (cart && cart.length > 0) {
+      // ✅ Safe check before mapping
+      if (Array.isArray(cart) && cart.length > 0) {
         await Promise.all(cart.map((item) => api.delete(`/cart/${item.id}`)));
       }
       setCart([]);
@@ -111,19 +113,26 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // FIXED: Always ensure cart is an array before using reduce
-  const cartCount = (cart && Array.isArray(cart)) 
-    ? cart.reduce((sum, item) => sum + (item.quantity || 0), 0)
-    : 0;
+  // ✅ TRIPLE SAFETY: Ensure cart is always an array before reduce
+  const safeCart = Array.isArray(cart) ? cart : [];
+  
+  // ✅ Safe reduce with default values
+  const cartCount = safeCart.reduce((sum, item) => {
+    const qty = Number(item?.quantity) || 0;
+    return sum + qty;
+  }, 0);
 
-  const cartTotal = (cart && Array.isArray(cart))
-    ? cart.reduce((sum, item) => sum + ((item.product?.price || 0) * (item.quantity || 0)), 0)
-    : 0;
+  // ✅ Safe reduce for total price
+  const cartTotal = safeCart.reduce((sum, item) => {
+    const price = Number(item?.product?.price) || 0;
+    const qty = Number(item?.quantity) || 0;
+    return sum + (price * qty);
+  }, 0);
 
   return (
     <CartContext.Provider
       value={{
-        cart: cart || [], // Always provide an array
+        cart: safeCart, // ✅ Always provide the safe array
         loading,
         addToBag,
         updateQuantity,
