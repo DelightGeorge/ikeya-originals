@@ -3,32 +3,33 @@ import { ArrowRight, Instagram, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Lookbook = () => {
-  const collections = [
-    {
-      id: 1,
-      title: "The Heritage Bloom",
-      theme: "Cultural Elegance x Modern Silhouettes",
-      description:
-        "A celebration of Adire fabrics paired with our signature growth oil for a healthy, glowing aesthetic.",
-      mainImage:
-        "https://images.unsplash.com/photo-1539109132381-31a15b22e8c0?auto=format&fit=crop&q=80&w=1200",
-      featuredProducts: ["Adire Two-Piece", "Growth Oil"],
-      testimonial: "The way the fabric moves is magical. It feels like art.",
-      client: "Sarah J., Lagos",
-    },
-    {
-      id: 2,
-      title: "Urban Crown",
-      theme: "Protective Styling & Street Luxe",
-      description:
-        "Showcasing our premium wigs and the Minimal Linen wear line for the woman on the go.",
-      mainImage:
-        "https://images.unsplash.com/photo-1492633397843-92adffad3d1c?auto=format&fit=crop&q=80&w=1200",
-      featuredProducts: ["Linen Wear", "Satin Bonnet"],
-      testimonial: "Finally, a brand that understands my hair and my style.",
-      client: "Bisi A., Abuja",
-    },
-  ];
+const collections = [
+  {
+    id: 1,
+    title: "The Heritage Bloom",
+    theme: "Cultural Elegance x Modern Silhouettes",
+    description:
+      "A celebration of Adire fabrics paired with our signature growth oil for a healthy, glowing aesthetic.",
+    mainImage:
+      "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_1400/v1770814975/ikeya1_hszczi.jpg",
+    featuredProducts: ["Adire Two-Piece", "Growth Oil"],
+    testimonial: "The way the fabric moves is magical. It feels like art.",
+    client: "Sarah J., Lagos",
+  },
+  {
+    id: 2,
+    title: "Urban Crown",
+    theme: "Protective Styling & Street Luxe",
+    description:
+      "Showcasing our premium wigs and the Minimal Linen wear line for the woman on the go.",
+    mainImage:
+      "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_1400/v1770814973/ikeya2_jhyfca.jpg",
+    featuredProducts: ["Linen Wear", "Satin Bonnet"],
+    testimonial: "Finally, a brand that understands my hair and my style.",
+    client: "Bisi A., Abuja",
+  },
+];
+
 
   // Handle PDF download
   const handleDownloadPDF = () => {
