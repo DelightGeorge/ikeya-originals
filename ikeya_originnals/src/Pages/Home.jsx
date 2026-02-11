@@ -42,12 +42,13 @@ const Home = () => {
       try {
         // Updated: Using api.get and relative paths (baseUrl is handled in api.js)
         const [fashionRes, beautyRes] = await Promise.all([
-          api.get("/products?type=FASHION&limit=4"),
-          api.get("/products?type=BEAUTY&limit=2"),
+          api.get("/products/type/FASHION"),
+          api.get("/products/type/BEAUTY"),
         ]);
 
-        setFashionProducts(fashionRes.data);
-        setBeautyProducts(beautyRes.data);
+        setFashionProducts(fashionRes.data.slice(0, 4));
+        setBeautyProducts(beautyRes.data.slice(0, 4));
+        
       } catch (err) {
         console.error("Error fetching home products:", err);
       } finally {
@@ -72,7 +73,7 @@ const Home = () => {
         <div className="h-screen flex flex-col items-center justify-center bg-white">
           <Loader2 className="animate-spin text-amber-900 mb-4" size={32} />
           <p className="text-[10px] uppercase tracking-[0.4em] text-neutral-400 font-bold">
-            Entering the House of  Ikeyá
+            Entering the House of Ikeyá
           </p>
         </div>
       </Layout>
@@ -184,7 +185,7 @@ const Home = () => {
                   alt={p.name}
                   className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105 cursor-pointer"
                 />
-                <button 
+                <button
                   onClick={() => addToBag(p)}
                   className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
                 >
@@ -235,7 +236,7 @@ const Home = () => {
                 key={p.id}
                 className="group flex flex-col sm:flex-row bg-white/5 p-4 rounded-none items-center gap-10 border border-white/5 hover:border-amber-800/50 transition-all duration-700"
               >
-                <div 
+                <div
                   onClick={() => navigate(`/product/${p.id}`)}
                   className="w-full sm:w-1/2 aspect-square overflow-hidden transition-all duration-700 cursor-pointer"
                 >
@@ -258,9 +259,9 @@ const Home = () => {
                   <p className="text-xl text-white font-light mb-6 italic">
                     {formatPrice(p.price)}
                   </p>
-                  
+
                   <div className="flex flex-col gap-3">
-                    <button 
+                    <button
                       onClick={() => addToBag(p)}
                       className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-amber-800 hover:text-white transition-all flex items-center justify-center gap-2"
                     >
@@ -300,7 +301,7 @@ const Home = () => {
                 <div className="flex items-center gap-4 text-amber-900">
                   <Scissors size={24} />
                   <h3 className="text-xl font-bold uppercase tracking-widest text-black">
-                     Ikeyá Designs
+                    Ikeyá Designs
                   </h3>
                 </div>
                 <p className="text-neutral-500 text-lg leading-relaxed border-l-2 border-neutral-100 pl-6">
@@ -348,15 +349,18 @@ const Home = () => {
           {[
             {
               name: "Amina O.",
-              quote: "Ikeyá Designs is where I find pieces that represent my culture and my ambition.",
+              quote:
+                "Ikeyá Designs is where I find pieces that represent my culture and my ambition.",
             },
             {
               name: "Deborah K.",
-              quote: "The Naturals growth oil is a staple in my routine. Organic, effective, and beautiful.",
+              quote:
+                "The Naturals growth oil is a staple in my routine. Organic, effective, and beautiful.",
             },
             {
               name: "Tolu A.",
-              quote: "The perfect synergy of fashion and wellness. This is the future of luxury.",
+              quote:
+                "The perfect synergy of fashion and wellness. This is the future of luxury.",
             },
           ].map((t, i) => (
             <div key={i} className="text-left space-y-6">

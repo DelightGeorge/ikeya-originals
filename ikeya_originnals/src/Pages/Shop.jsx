@@ -6,17 +6,18 @@ import { getProducts } from "../services/productService";
 import { useCart } from "../Context/CartContext";
 
 const Shop = () => {
-  const [activeCategory, setActiveCategory] = useState("All");
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+
+  const searchQuery = searchParams.get("search")?.toLowerCase() || "";
+  const typeQuery = searchParams.get("type") || "All";
+
+  const [activeCategory, setActiveCategory] = useState(typeQuery);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const { addToBag } = useCart();
-  const location = useLocation();
-
-  // --- GET SEARCH QUERY FROM URL ---
-  const searchParams = new URLSearchParams(location.search);
-  const searchQuery = searchParams.get("search")?.toLowerCase() || "";
 
   useEffect(() => {
     const fetchShopData = async () => {
@@ -33,12 +34,9 @@ const Shop = () => {
     fetchShopData();
   }, []);
 
-  // --- COMBINED FILTER LOGIC (Category + Search) ---
   const filteredProducts = products.filter((p) => {
     const matchesCategory =
-      activeCategory === "All" ||
-      p.category?.name === activeCategory ||
-      p.type === activeCategory;
+      activeCategory === "All" || p.type === activeCategory;
 
     const matchesSearch =
       !searchQuery ||
@@ -48,7 +46,7 @@ const Shop = () => {
     return matchesCategory && matchesSearch;
   });
 
-  const categories = ["All", "Fashion", "Beauty"];
+  const categories = ["All", "FASHION", "BEAUTY"];
 
   return (
     <Layout>
@@ -58,7 +56,6 @@ const Shop = () => {
             Ikeyà <span className="text-amber-800 italic">Collection</span>
           </h1>
 
-          {/* Active Search Indicator */}
           {searchQuery && (
             <div className="flex items-center justify-center gap-3 mt-4">
               <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">
@@ -111,18 +108,6 @@ const Shop = () => {
             <AlertCircle size={32} className="mb-2" />
             <p className="text-sm">{error}</p>
           </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">
-              No pieces found matching your criteria.
-            </p>
-            <Link
-              to="/shop"
-              className="text-[10px] font-bold uppercase tracking-widest border-b border-black mt-4 inline-block"
-            >
-              View All Products
-            </Link>
-          </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12">
             {filteredProducts.map((p) => (
@@ -135,9 +120,11 @@ const Shop = () => {
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                     />
                   </Link>
-                  // in your add button inside the product grid
+
                   <button
-                    onClick={() => addToBag({ productId: p.id, quantity: 1 })}
+                    onClick={() =>
+                      addToBag({ productId: p.id, quantity: 1 })
+                    }
                     className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
                   >
                     <ShoppingBag size={14} /> Add to Bag
@@ -151,10 +138,10 @@ const Shop = () => {
                     </h3>
                   </Link>
                   <p className="text-[10px] uppercase text-black/50 tracking-widest">
-                    {p.category?.name || p.type}
+                    {p.type}
                   </p>
                   <p className="text-sm font-bold text-black mt-1">
-                    ₦{(p.price / (p.price > 100000 ? 1 : 1)).toLocaleString()}
+                    ₦{(p.price / 100).toLocaleString()}
                   </p>
                 </div>
               </div>
