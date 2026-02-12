@@ -181,7 +181,7 @@ const Lookbook = () => {
                 ].map((image, i) => (
                   <a
                     key={i}
-                    href="https://instagram.com/IkeyaOriginals"
+                    href="https://www.instagram.com/ikeya_originals?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                     target="_blank"
                     rel="noopener noreferrer"
                     className="relative group w-[250px] md:w-[300px] aspect-[4/5] overflow-hidden"
