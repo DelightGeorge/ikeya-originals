@@ -23,6 +23,7 @@ import ProductDetail from "./Pages/ProductDetail";
 import Profile from "./Pages/Profile";
 import ResetPassword from "./Pages/ResetPassword";
 import AdminUsers from "./Pages/AdminUsers";
+import PaymentCallback from "./Pages/PaymentCallback";
 
 const router = createBrowserRouter([
   {
@@ -84,6 +85,10 @@ const router = createBrowserRouter([
       {
         path: "/verify-login",
         element: <VerifyLogin />,
+      },
+      {
+        path: "/payment-callback",
+        element: <PaymentCallback />,
       },
       {
         path: "/admin/dashboard",
