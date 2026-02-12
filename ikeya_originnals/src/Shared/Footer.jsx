@@ -4,7 +4,7 @@ import {
   Mail, Phone, MapPin, ArrowRight, Loader2, CheckCircle2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import api from "../../services/api";
+import api from "../services/api";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
