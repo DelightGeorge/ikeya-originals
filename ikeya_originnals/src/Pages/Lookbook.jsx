@@ -156,31 +156,58 @@ const Lookbook = () => {
               <div className="w-20 h-[1px] bg-amber-800 mx-auto opacity-50"></div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900663/ikeya4_xzxndl.jpg",
-                "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya5_hhmpvq.jpg",
-                "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya6_rdnka6.jpg",
-                "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya7_phznct.jpg",
-              ].map((image, i) => (
-                <div
-                  key={i}
-                  className="aspect-[4/5] bg-neutral-900 relative group overflow-hidden"
-                >
-                  <img
-                    src={image}
-                    alt="Ikeyà Community"
-                    className="w-full h-full object-cover opacity-70 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-700"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/60">
-                    <Instagram
-                      className="text-white"
-                      size={20}
-                      strokeWidth={1.5}
+            {/* --- LUXURY AUTO SLIDER --- */}
+            <div className="relative overflow-hidden">
+              <div className="flex animate-scroll gap-8 w-max">
+                {[
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900663/ikeya4_xzxndl.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya5_hhmpvq.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya6_rdnka6.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya7_phznct.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya9_zqtzfv.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya10_d0u6zy.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901095/ikeya8_icc4qy.jpg",
+                  ,
+                  // Duplicate for seamless infinite effect
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900663/ikeya4_xzxndl.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya5_hhmpvq.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya6_rdnka6.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya7_phznct.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya9_zqtzfv.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya10_d0u6zy.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901095/ikeya8_icc4qy.jpg",
+                ].map((image, i) => (
+                  <a
+                    key={i}
+                    href="https://instagram.com/IkeyaOriginals"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative group w-[250px] md:w-[300px] aspect-[4/5] overflow-hidden"
+                  >
+                    <img
+                      src={image}
+                      alt="Ikeyà Community"
+                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
                     />
-                  </div>
-                </div>
-              ))}
+
+                    {/* Soft Overlay */}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+
+                    {/* Instagram Icon */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-500">
+                      <div className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-xl">
+                        <Instagram
+                          size={18}
+                          className="text-black"
+                          strokeWidth={1.5}
+                        />
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
             </div>
 
             <div className="mt-20 text-center">
