@@ -24,6 +24,7 @@ import Profile from "./Pages/Profile";
 import ResetPassword from "./Pages/ResetPassword";
 import AdminUsers from "./Pages/AdminUsers";
 import PaymentCallback from "./Pages/PaymentCallback";
+import OrderSuccess from "./Pages/OrderSuccess";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +82,10 @@ const router = createBrowserRouter([
       {
         path: "/orders",
         element: <Order />,
+      },
+      {
+        path: "/order-success",
+        element: <OrderSuccess />,
       },
       {
         path: "/verify-login",
