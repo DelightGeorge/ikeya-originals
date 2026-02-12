@@ -3,33 +3,32 @@ import { ArrowRight, Instagram, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Lookbook = () => {
-const collections = [
-  {
-    id: 1,
-    title: "The Heritage Bloom",
-    theme: "Cultural Elegance x Modern Silhouettes",
-    description:
-      "A celebration of Adire fabrics paired with our signature growth oil for a healthy, glowing aesthetic.",
-    mainImage:
-      "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_1400/v1770814975/ikeya1_hszczi.jpg",
-    featuredProducts: ["Adire Two-Piece", "Growth Oil"],
-    testimonial: "The way the fabric moves is magical. It feels like art.",
-    client: "Sarah J., Lagos",
-  },
-  {
-    id: 2,
-    title: "Urban Crown",
-    theme: "Protective Styling & Street Luxe",
-    description:
-      "Showcasing our premium wigs and the Minimal Linen wear line for the woman on the go.",
-    mainImage:
-      "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_1400/v1770814973/ikeya2_jhyfca.jpg",
-    featuredProducts: ["Linen Wear", "Satin Bonnet"],
-    testimonial: "Finally, a brand that understands my hair and my style.",
-    client: "Bisi A., Abuja",
-  },
-];
-
+  const collections = [
+    {
+      id: 1,
+      title: "The Heritage Bloom",
+      theme: "Cultural Elegance x Modern Silhouettes",
+      description:
+        "A celebration of Adire fabrics paired with our signature growth oil for a healthy, glowing aesthetic.",
+      mainImage:
+        "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_1400/v1770814975/ikeya1_hszczi.jpg",
+      featuredProducts: ["Adire Two-Piece", "Growth Oil"],
+      testimonial: "The way the fabric moves is magical. It feels like art.",
+      client: "Sarah J., Lagos",
+    },
+    {
+      id: 2,
+      title: "Urban Crown",
+      theme: "Protective Styling & Street Luxe",
+      description:
+        "Showcasing our premium wigs and the Minimal Linen wear line for the woman on the go.",
+      mainImage:
+        "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_1400/v1770814973/ikeya2_jhyfca.jpg",
+      featuredProducts: ["Linen Wear", "Satin Bonnet"],
+      testimonial: "Finally, a brand that understands my hair and my style.",
+      client: "Bisi A., Abuja",
+    },
+  ];
 
   // Handle PDF download
   const handleDownloadPDF = () => {
@@ -152,21 +151,26 @@ const collections = [
                 Community
               </span>
               <h2 className="text-4xl md:text-6xl font-display text-white mb-6 uppercase tracking-tighter">
-                Ikeyà Women
+                Ikeyá Women
               </h2>
               <div className="w-20 h-[1px] bg-amber-800 mx-auto opacity-50"></div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((i) => (
+              {[
+                "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900663/ikeya4_xzxndl.jpg",
+                "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya5_hhmpvq.jpg",
+                "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya6_rdnka6.jpg",
+                "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya7_phznct.jpg",
+              ].map((image, i) => (
                 <div
                   key={i}
                   className="aspect-[4/5] bg-neutral-900 relative group overflow-hidden"
                 >
                   <img
-                    src={`https://images.unsplash.com/photo-1523944339743-0fe06f079939?auto=format&fit=crop&q=80&w=600&sig=${i}`}
-                    alt="Client Showcase"
-                    className="w-full h-full object-cover opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-700"
+                    src={image}
+                    alt="Ikeyà Community"
+                    className="w-full h-full object-cover opacity-70 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-700"
                   />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/60">
                     <Instagram
