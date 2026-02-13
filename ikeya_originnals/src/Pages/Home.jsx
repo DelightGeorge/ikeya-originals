@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import api from "../services/api"; // Updated: Use central api instance instead of axios
+import api from "../services/api";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
 import { useCart } from "../Context/CartContext";
@@ -19,7 +19,6 @@ import {
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 
-// Swiper Styles
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
@@ -28,6 +27,8 @@ const Home = () => {
   const [fashionProducts, setFashionProducts] = useState([]);
   const [beautyProducts, setBeautyProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  // FIX 1: Track fetch errors so the page doesn't hang on failure
+  const [fetchError, setFetchError] = useState(false);
   const { addToBag } = useCart();
   const navigate = useNavigate();
 
@@ -39,21 +40,32 @@ const Home = () => {
 
   useEffect(() => {
     const fetchHomeData = async () => {
+      // FIX 2: Always ensure loading is cleared — use individual try/catch
+      // per request so one failure doesn't block the whole page
       try {
-        // Updated: Using api.get and relative paths (baseUrl is handled in api.js)
-        const [fashionRes, beautyRes] = await Promise.all([
-          api.get("/products/type/FASHION"),
-          api.get("/products/type/BEAUTY"),
-        ]);
-
-        setFashionProducts(fashionRes.data.slice(0, 4));
-        setBeautyProducts(beautyRes.data.slice(0, 4));
-        
+        const fashionRes = await api.get("/products/type/FASHION");
+        // FIX 3: Guard against unexpected response shapes
+        const fashionData = Array.isArray(fashionRes.data)
+          ? fashionRes.data
+          : fashionRes.data?.content ?? fashionRes.data?.products ?? [];
+        setFashionProducts(fashionData.slice(0, 4));
       } catch (err) {
-        console.error("Error fetching home products:", err);
-      } finally {
-        setLoading(false);
+        console.error("Fashion fetch error:", err);
+        // Don't block the page — just show empty section
       }
+
+      try {
+        const beautyRes = await api.get("/products/type/BEAUTY");
+        const beautyData = Array.isArray(beautyRes.data)
+          ? beautyRes.data
+          : beautyRes.data?.content ?? beautyRes.data?.products ?? [];
+        setBeautyProducts(beautyData.slice(0, 4));
+      } catch (err) {
+        console.error("Beauty fetch error:", err);
+      }
+
+      // FIX 4: setLoading(false) is now GUARANTEED to run regardless of errors
+      setLoading(false);
     };
 
     fetchHomeData();
@@ -67,6 +79,7 @@ const Home = () => {
     }).format(priceInKobo / 100);
   };
 
+  // ── Loading screen ──────────────────────────────────────────────────────────
   if (loading) {
     return (
       <Layout>
@@ -80,6 +93,7 @@ const Home = () => {
     );
   }
 
+  // ── Main page ───────────────────────────────────────────────────────────────
   return (
     <Layout>
       {/* ================= HERO SECTION ================= */}
@@ -175,34 +189,41 @@ const Home = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {fashionProducts.map((p) => (
-            <div key={p.id} className="group flex flex-col h-full">
-              <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden mb-5">
-                <img
-                  onClick={() => navigate(`/product/${p.id}`)}
-                  src={p.imageUrl}
-                  alt={p.name}
-                  className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105 cursor-pointer"
-                />
-                <button
-                  onClick={() => addToBag(p)}
-                  className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
-                >
-                  <ShoppingBag size={14} /> Add to Bag
-                </button>
+        {/* FIX 5: Empty state if no fashion products loaded */}
+        {fashionProducts.length === 0 ? (
+          <div className="py-16 text-center text-neutral-300 text-xs uppercase tracking-widest">
+            Collection coming soon
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            {fashionProducts.map((p) => (
+              <div key={p.id} className="group flex flex-col h-full">
+                <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden mb-5">
+                  <img
+                    onClick={() => navigate(`/product/${p.id}`)}
+                    src={p.imageUrl}
+                    alt={p.name}
+                    className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105 cursor-pointer"
+                  />
+                  <button
+                    onClick={() => addToBag(p)}
+                    className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
+                  >
+                    <ShoppingBag size={14} /> Add to Bag
+                  </button>
+                </div>
+                <Link to={`/product/${p.id}`}>
+                  <h3 className="font-bold text-sm uppercase tracking-widest text-black mb-1 hover:text-amber-800 transition-colors">
+                    {p.name}
+                  </h3>
+                </Link>
+                <p className="text-amber-900 font-medium text-sm">
+                  {formatPrice(p.price)}
+                </p>
               </div>
-              <Link to={`/product/${p.id}`}>
-                <h3 className="font-bold text-sm uppercase tracking-widest text-black mb-1 hover:text-amber-800 transition-colors">
-                  {p.name}
-                </h3>
-              </Link>
-              <p className="text-amber-900 font-medium text-sm">
-                {formatPrice(p.price)}
-              </p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ================= BEAUTY: IKEYÀ NATURALS ================= */}
@@ -230,54 +251,60 @@ const Home = () => {
             </Link>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12">
-            {beautyProducts.map((p) => (
-              <div
-                key={p.id}
-                className="group flex flex-col sm:flex-row bg-white/5 p-4 rounded-none items-center gap-10 border border-white/5 hover:border-amber-800/50 transition-all duration-700"
-              >
+          {/* FIX 5: Empty state if no beauty products loaded */}
+          {beautyProducts.length === 0 ? (
+            <div className="py-16 text-center text-neutral-500 text-xs uppercase tracking-widest">
+              Products coming soon
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-12">
+              {beautyProducts.map((p) => (
                 <div
-                  onClick={() => navigate(`/product/${p.id}`)}
-                  className="w-full sm:w-1/2 aspect-square overflow-hidden transition-all duration-700 cursor-pointer"
+                  key={p.id}
+                  className="group flex flex-col sm:flex-row bg-white/5 p-4 rounded-none items-center gap-10 border border-white/5 hover:border-amber-800/50 transition-all duration-700"
                 >
-                  <img
-                    src={p.imageUrl}
-                    alt={p.name}
-                    className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
-                  />
-                </div>
-                <div className="w-full sm:w-1/2 pr-4 text-center sm:text-left">
-                  <div className="flex items-center justify-center sm:justify-start gap-2 text-amber-600 mb-3">
-                    <Sparkles size={14} />
-                    <span className="text-[10px] uppercase tracking-[0.3em] font-bold">
-                      {p.category?.name || "Organic"}
-                    </span>
+                  <div
+                    onClick={() => navigate(`/product/${p.id}`)}
+                    className="w-full sm:w-1/2 aspect-square overflow-hidden transition-all duration-700 cursor-pointer"
+                  >
+                    <img
+                      src={p.imageUrl}
+                      alt={p.name}
+                      className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                    />
                   </div>
-                  <h3 className="text-2xl font-display font-bold mb-2 uppercase tracking-tight">
-                    {p.name}
-                  </h3>
-                  <p className="text-xl text-white font-light mb-6 italic">
-                    {formatPrice(p.price)}
-                  </p>
-
-                  <div className="flex flex-col gap-3">
-                    <button
-                      onClick={() => addToBag(p)}
-                      className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-amber-800 hover:text-white transition-all flex items-center justify-center gap-2"
-                    >
-                      <ShoppingBag size={14} /> Add to Bag
-                    </button>
-                    <Link
-                      to={`/product/${p.id}`}
-                      className="block w-full text-center border border-white/30 text-white py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:border-white transition-all"
-                    >
-                      View Details
-                    </Link>
+                  <div className="w-full sm:w-1/2 pr-4 text-center sm:text-left">
+                    <div className="flex items-center justify-center sm:justify-start gap-2 text-amber-600 mb-3">
+                      <Sparkles size={14} />
+                      <span className="text-[10px] uppercase tracking-[0.3em] font-bold">
+                        {p.category?.name || "Organic"}
+                      </span>
+                    </div>
+                    <h3 className="text-2xl font-display font-bold mb-2 uppercase tracking-tight">
+                      {p.name}
+                    </h3>
+                    <p className="text-xl text-white font-light mb-6 italic">
+                      {formatPrice(p.price)}
+                    </p>
+                    <div className="flex flex-col gap-3">
+                      <button
+                        onClick={() => addToBag(p)}
+                        className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-amber-800 hover:text-white transition-all flex items-center justify-center gap-2"
+                      >
+                        <ShoppingBag size={14} /> Add to Bag
+                      </button>
+                      <Link
+                        to={`/product/${p.id}`}
+                        className="block w-full text-center border border-white/30 text-white py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:border-white transition-all"
+                      >
+                        View Details
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -365,7 +392,7 @@ const Home = () => {
           ].map((t, i) => (
             <div key={i} className="text-left space-y-6">
               <p className="text-2xl font-display italic text-black leading-snug">
-                “{t.quote}”
+                "{t.quote}"
               </p>
               <div className="flex items-center gap-4">
                 <div className="w-8 h-[1px] bg-amber-800"></div>
