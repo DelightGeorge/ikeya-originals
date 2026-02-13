@@ -33,38 +33,55 @@ const Home = () => {
 
   // Each hero image has a custom object-position so the subject is always
   // well-framed on both mobile and desktop viewports.
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Each slide has its own inline style so you can fine-tune per image.
+  // objectPosition controls WHAT part of the photo stays visible in the frame.
+  //   "center center"  → centres the image (landscape / full-body shots)
+  //   "top center"     → anchors to the top (keeps faces / heads in frame)
+  //   "50% 20%"        → focal point sits 20% from top (slightly below top)
+  //
+  // If any image still looks off after deploying, just change its objectPosition.
+  // ─────────────────────────────────────────────────────────────────────────────
   const heroImages = [
     {
+      // Product flat-lay / fashion item — centre works well
       src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770764193/ikeya/products/slrji7iim9uagvjq79c3.jpg",
-      position: "object-center",
+      style: { objectFit: "cover", objectPosition: "center center" },
     },
     {
+      // Portrait shot — anchor top so face stays in frame
       src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770573948/ikeya/products/joel6urttprrzpm5acmb.jpg",
-      position: "object-top",
+      style: { objectFit: "cover", objectPosition: "top center" },
     },
     {
+      // Full scene — centre
       src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
-      position: "object-center",
+      style: { objectFit: "cover", objectPosition: "center center" },
     },
     {
+      // Pull focal point slightly downward from the very top
       src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya6_rdnka6.jpg",
-      position: "object-center",
+      style: { objectFit: "cover", objectPosition: "50% 20%" },
     },
     {
+      // Portrait — top anchor
       src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya9_zqtzfv.jpg",
-      position: "object-top",
+      style: { objectFit: "cover", objectPosition: "top center" },
     },
     {
+      // Full composition — centre
       src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya5_hhmpvq.jpg",
-      position: "object-center",
+      style: { objectFit: "cover", objectPosition: "center center" },
     },
     {
+      // Full composition — centre
       src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya7_phznct.jpg",
-      position: "object-center",
+      style: { objectFit: "cover", objectPosition: "center center" },
     },
     {
+      // Portrait / upper body — top anchor
       src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900007/ikeya3_kjzvbe.jpg",
-      position: "object-top",
+      style: { objectFit: "cover", objectPosition: "top center" },
     },
   ];
 
@@ -136,7 +153,8 @@ const Home = () => {
               <img
                 src={image.src}
                 alt="Ikeyá Originals Brand Hero"
-                className={`w-full h-full object-cover ${image.position} grayscale-[20%] brightness-[0.7]`}
+                className="w-full h-full brightness-[0.72]"
+                style={image.style}
                 loading={i === 0 ? "eager" : "lazy"}
               />
             </SwiperSlide>
