@@ -160,7 +160,7 @@ const Home = () => {
               Sub-Brand 01
             </span>
             <h2 className="text-4xl md:text-5xl font-display text-black font-bold uppercase tracking-tighter">
-              Ikeyá Designs
+              Style X Ikeyá
             </h2>
           </div>
           <Link
