@@ -27,31 +27,57 @@ const Home = () => {
   const [fashionProducts, setFashionProducts] = useState([]);
   const [beautyProducts, setBeautyProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  // FIX 1: Track fetch errors so the page doesn't hang on failure
   const [fetchError, setFetchError] = useState(false);
   const { addToBag } = useCart();
   const navigate = useNavigate();
 
+  // Each hero image has a custom object-position so the subject is always
+  // well-framed on both mobile and desktop viewports.
   const heroImages = [
-    "https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?auto=format&fit=crop&q=80&w=1600",
-    "https://images.unsplash.com/photo-1620331311520-246422fd82f9?auto=format&fit=crop&q=80&w=1600",
-    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1600",
+    {
+      src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770764193/ikeya/products/slrji7iim9uagvjq79c3.jpg",
+      position: "object-center",
+    },
+    {
+      src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770573948/ikeya/products/joel6urttprrzpm5acmb.jpg",
+      position: "object-top",
+    },
+    {
+      src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
+      position: "object-center",
+    },
+    {
+      src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya6_rdnka6.jpg",
+      position: "object-center",
+    },
+    {
+      src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya9_zqtzfv.jpg",
+      position: "object-top",
+    },
+    {
+      src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya5_hhmpvq.jpg",
+      position: "object-center",
+    },
+    {
+      src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya7_phznct.jpg",
+      position: "object-center",
+    },
+    {
+      src: "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900007/ikeya3_kjzvbe.jpg",
+      position: "object-top",
+    },
   ];
 
   useEffect(() => {
     const fetchHomeData = async () => {
-      // FIX 2: Always ensure loading is cleared — use individual try/catch
-      // per request so one failure doesn't block the whole page
       try {
         const fashionRes = await api.get("/products/type/FASHION");
-        // FIX 3: Guard against unexpected response shapes
         const fashionData = Array.isArray(fashionRes.data)
           ? fashionRes.data
           : fashionRes.data?.content ?? fashionRes.data?.products ?? [];
         setFashionProducts(fashionData.slice(0, 4));
       } catch (err) {
         console.error("Fashion fetch error:", err);
-        // Don't block the page — just show empty section
       }
 
       try {
@@ -64,7 +90,6 @@ const Home = () => {
         console.error("Beauty fetch error:", err);
       }
 
-      // FIX 4: setLoading(false) is now GUARANTEED to run regardless of errors
       setLoading(false);
     };
 
@@ -106,12 +131,12 @@ const Home = () => {
           pagination={{ clickable: true }}
           className="absolute inset-0 w-full h-full"
         >
-          {heroImages.map((src, i) => (
+          {heroImages.map((image, i) => (
             <SwiperSlide key={i} className="w-full h-full">
               <img
-                src={src}
+                src={image.src}
                 alt="Ikeyá Originals Brand Hero"
-                className="w-full h-full object-cover object-top md:object-center grayscale-[30%] brightness-75"
+                className={`w-full h-full object-cover ${image.position} grayscale-[20%] brightness-[0.7]`}
                 loading={i === 0 ? "eager" : "lazy"}
               />
             </SwiperSlide>
@@ -189,7 +214,6 @@ const Home = () => {
           </Link>
         </div>
 
-        {/* FIX 5: Empty state if no fashion products loaded */}
         {fashionProducts.length === 0 ? (
           <div className="py-16 text-center text-neutral-300 text-xs uppercase tracking-widest">
             Collection coming soon
@@ -203,7 +227,7 @@ const Home = () => {
                     onClick={() => navigate(`/product/${p.id}`)}
                     src={p.imageUrl}
                     alt={p.name}
-                    className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105 cursor-pointer"
+                    className="w-full h-full object-cover object-top grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105 cursor-pointer"
                   />
                   <button
                     onClick={() => addToBag(p)}
@@ -251,7 +275,6 @@ const Home = () => {
             </Link>
           </div>
 
-          {/* FIX 5: Empty state if no beauty products loaded */}
           {beautyProducts.length === 0 ? (
             <div className="py-16 text-center text-neutral-500 text-xs uppercase tracking-widest">
               Products coming soon
@@ -270,7 +293,7 @@ const Home = () => {
                     <img
                       src={p.imageUrl}
                       alt={p.name}
-                      className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                      className="w-full h-full object-cover object-center grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
                     />
                   </div>
                   <div className="w-full sm:w-1/2 pr-4 text-center sm:text-left">
