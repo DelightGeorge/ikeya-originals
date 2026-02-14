@@ -3,7 +3,7 @@ import api from "../services/api";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
 import { useCart } from "../Context/CartContext";
-import LoadingScreen from "../components/LoadingScreen";
+
 import { formatPrice } from "../utils/formatters";
 import { MAX_FEATURED_PRODUCTS } from "../constants/products";
 import {
@@ -24,6 +24,7 @@ import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
+import LoadingScreen from "../components/LoadingScreen";
 
 const Home = () => {
   const [fashionProducts, setFashionProducts] = useState([]);
@@ -48,6 +49,7 @@ const Home = () => {
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770573948/ikeya/products/joel6urttprrzpm5acmb.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770814973/ikeya2_jhyfca.jpg",
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1771080034/ikeya12_otjnko.jpg"
   ];
 
   const trustFeatures = useMemo(
