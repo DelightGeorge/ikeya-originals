@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import api from "../services/api";
+import { toast } from "react-hot-toast";
 
 const CartContext = createContext();
 
@@ -44,7 +45,7 @@ export const CartProvider = ({ children }) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Please log in to add items to your cart");
+        toast.error("Please log in to add items to your cart");
         return;
       }
 
@@ -62,7 +63,7 @@ export const CartProvider = ({ children }) => {
         quantity = qty;
       } else {
         console.error("Invalid product data:", productOrData);
-        alert("Invalid product data");
+        toast.error("Invalid product data");
         return;
       }
 
@@ -75,7 +76,7 @@ export const CartProvider = ({ children }) => {
       // Refresh cart after adding
       await fetchCart();
       
-      alert("Item added to cart!");
+      toast.success("Item added to cart!");
       
       return response.data;
     } catch (err) {
@@ -83,10 +84,10 @@ export const CartProvider = ({ children }) => {
       console.error("Error details:", err.response?.data);
       
       if (err.response?.status === 401) {
-        alert("Please log in to add items to your cart");
+        toast.error("Please log in to add items to your cart");
       } else {
         const errorMsg = err.response?.data?.message || "Failed to add item to cart. Please try again.";
-        alert(errorMsg);
+        toast.error(errorMsg);
       }
       throw err;
     }
@@ -103,7 +104,7 @@ export const CartProvider = ({ children }) => {
       await fetchCart();
     } catch (err) {
       console.error("Error updating quantity:", err);
-      alert("Failed to update quantity");
+      toast.error("Failed to update quantity");
     }
   };
 
@@ -113,7 +114,7 @@ export const CartProvider = ({ children }) => {
       await fetchCart();
     } catch (err) {
       console.error("Error removing item:", err);
-      alert("Failed to remove item");
+      toast.error("Failed to remove item");
     }
   };
 
