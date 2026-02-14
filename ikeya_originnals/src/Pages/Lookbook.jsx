@@ -168,7 +168,7 @@ const Lookbook = () => {
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya10_d0u6zy.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901095/ikeya8_icc4qy.jpg",
-                  ,
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1771080035/ikeya13_pyzgvp.jpg",
                   // Duplicate for seamless infinite effect
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900663/ikeya4_xzxndl.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya5_hhmpvq.jpg",
@@ -178,6 +178,7 @@ const Lookbook = () => {
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya10_d0u6zy.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901095/ikeya8_icc4qy.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1771080035/ikeya13_pyzgvp.jpg",
                 ].map((image, i) => (
                   <a
                     key={i}

@@ -48,6 +48,7 @@ const Home = () => {
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770573948/ikeya/products/joel6urttprrzpm5acmb.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770814973/ikeya2_jhyfca.jpg",
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1771080034/ikeya12_otjnko.jpg",
   ];
 
   const trustFeatures = useMemo(
