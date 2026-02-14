@@ -7,7 +7,7 @@ import { PRODUCT_TYPES } from "../constants/products";
 import { Filter, ShoppingBag, AlertCircle, X } from "lucide-react";
 import { getProducts } from "../services/productService";
 import { useCart } from "../Context/CartContext";
-import LoadingScreen from "../components/LoadingScreen";
+import LoadingScreen from "../Components/LoadingScreen";
 
 const Shop = () => {
   const location = useLocation();
