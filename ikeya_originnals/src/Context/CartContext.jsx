@@ -12,7 +12,6 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  // ✅ ALWAYS initialize as empty array
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,24 +29,40 @@ export const CartProvider = ({ children }) => {
       }
 
       const response = await api.get("/cart");
-      
-      // ✅ ALWAYS ensure we set an array
       const cartData = response.data;
       setCart(Array.isArray(cartData) ? cartData : []);
       
     } catch (err) {
       console.error("Error fetching cart:", err);
-      setCart([]); // ✅ Set empty array on error
+      setCart([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const addToBag = async ({ productId, quantity = 1 }) => {
+  const addToBag = async (productOrData, qty = 1) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         alert("Please log in to add items to your cart");
+        return;
+      }
+
+      // Handle both formats:
+      // addToBag(product) or addToBag({ productId, quantity })
+      let productId, quantity;
+      
+      if (productOrData?.productId) {
+        // Called as: addToBag({ productId: "123", quantity: 2 })
+        productId = productOrData.productId;
+        quantity = productOrData.quantity || 1;
+      } else if (productOrData?.id) {
+        // Called as: addToBag(product)
+        productId = productOrData.id;
+        quantity = qty;
+      } else {
+        console.error("Invalid product data:", productOrData);
+        alert("Invalid product data");
         return;
       }
 
@@ -70,7 +85,8 @@ export const CartProvider = ({ children }) => {
       if (err.response?.status === 401) {
         alert("Please log in to add items to your cart");
       } else {
-        alert("Failed to add item to cart. Please try again.");
+        const errorMsg = err.response?.data?.message || "Failed to add item to cart. Please try again.";
+        alert(errorMsg);
       }
       throw err;
     }
@@ -103,7 +119,6 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     try {
-      // ✅ Safe check before mapping
       if (Array.isArray(cart) && cart.length > 0) {
         await Promise.all(cart.map((item) => api.delete(`/cart/${item.id}`)));
       }
@@ -113,16 +128,13 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // ✅ TRIPLE SAFETY: Ensure cart is always an array before reduce
   const safeCart = Array.isArray(cart) ? cart : [];
   
-  // ✅ Safe reduce with default values
   const cartCount = safeCart.reduce((sum, item) => {
     const qty = Number(item?.quantity) || 0;
     return sum + qty;
   }, 0);
 
-  // ✅ Safe reduce for total price
   const cartTotal = safeCart.reduce((sum, item) => {
     const price = Number(item?.product?.price) || 0;
     const qty = Number(item?.quantity) || 0;
@@ -132,7 +144,7 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider
       value={{
-        cart: safeCart, // ✅ Always provide the safe array
+        cart: safeCart,
         loading,
         addToBag,
         updateQuantity,
