@@ -1,13 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
-
+import LoadingScreen from "../Components/LoadingScreen";
 import { formatPrice } from "../utils/formatters";
 import { PRODUCT_TYPES } from "../constants/products";
 import { Filter, ShoppingBag, AlertCircle, X } from "lucide-react";
 import { getProducts } from "../services/productService";
 import { useCart } from "../Context/CartContext";
-import LoadingScreen from "../Components/LoadingScreen";
 
 const Shop = () => {
   const location = useLocation();
