@@ -1,5 +1,5 @@
 import Layout from "../Shared/Layout/Layout";
-import LoadingScreen from "../components/LoadingScreen";
+
 import { formatPrice } from "../utils/formatters";
 import {
   Trash2,
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../Context/CartContext";
+import LoadingScreen from "../Components/LoadingScreen";
 
 const Cart = () => {
   const { cart, loading, updateQuantity, removeFromCart, cartTotal } = useCart();
