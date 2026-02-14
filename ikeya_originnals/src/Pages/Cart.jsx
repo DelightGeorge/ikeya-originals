@@ -1,41 +1,28 @@
 import Layout from "../Shared/Layout/Layout";
+import LoadingScreen from "../components/LoadingScreen";
+import { formatPrice } from "../utils/formatters";
 import {
   Trash2,
   Plus,
   Minus,
   ArrowRight,
   ShoppingBag,
-  Loader2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../Context/CartContext";
 
-const formatPrice = (kobo) =>
-  new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
-  }).format(kobo / 100);
-
 const Cart = () => {
-  // ✅ FIXED: Use correct destructuring - it's 'cart' not 'cartItems'
   const { cart, loading, updateQuantity, removeFromCart, cartTotal } = useCart();
   const navigate = useNavigate();
 
-  // ✅ FIXED: Use cartTotal from context instead of calculating here
-  const subtotal = cartTotal;
-
   const handleProceedToCheckout = () => {
-    navigate("/checkout", { state: { items: cart, subtotal } });
+    navigate("/checkout", { state: { items: cart, subtotal: cartTotal } });
   };
 
-  // ✅ Show loading state
   if (loading) {
     return (
       <Layout>
-        <div className="h-screen flex items-center justify-center bg-white">
-          <Loader2 className="animate-spin text-amber-900" size={32} />
-        </div>
+        <LoadingScreen message="Loading your bag..." />
       </Layout>
     );
   }
@@ -47,18 +34,17 @@ const Cart = () => {
           Your Bag
         </h1>
 
-        {/* ✅ FIXED: Check cart.length instead of cartItems.length */}
         {cart && cart.length > 0 ? (
           <div className="grid lg:grid-cols-3 gap-16">
+            {/* Cart Items */}
             <div className="lg:col-span-2 space-y-10">
-              {/* ✅ FIXED: Map over 'cart' instead of 'cartItems' */}
               {cart.map((item) => (
                 <div
                   key={item.id}
                   className="flex gap-8 pb-10 border-b border-neutral-100 items-center"
                 >
                   {/* Product Image */}
-                  <div className="w-24 h-32 bg-neutral-50 overflow-hidden">
+                  <div className="w-24 h-32 bg-neutral-50 overflow-hidden flex-shrink-0">
                     <img
                       src={item.product?.imageUrl}
                       alt={item.product?.name}
@@ -92,12 +78,13 @@ const Cart = () => {
                               Math.max(1, item.quantity - 1)
                             )
                           }
-                          className="p-2 hover:bg-neutral-50"
+                          className="p-2 hover:bg-neutral-50 transition-colors"
+                          aria-label="Decrease quantity"
                         >
                           <Minus size={12} />
                         </button>
 
-                        <span className="px-4 text-xs font-bold">
+                        <span className="px-4 text-xs font-bold min-w-[2rem] text-center">
                           {item.quantity}
                         </span>
 
@@ -105,16 +92,17 @@ const Cart = () => {
                           onClick={() =>
                             updateQuantity(item.id, item.quantity + 1)
                           }
-                          className="p-2 hover:bg-neutral-50"
+                          className="p-2 hover:bg-neutral-50 transition-colors"
+                          aria-label="Increase quantity"
                         >
                           <Plus size={12} />
                         </button>
                       </div>
 
-                      {/* ✅ FIXED: Use removeFromCart instead of removeItem */}
                       <button
                         onClick={() => removeFromCart(item.id)}
                         className="text-[10px] uppercase font-bold text-neutral-400 hover:text-red-600 transition flex items-center gap-2"
+                        aria-label="Remove item from cart"
                       >
                         <Trash2 size={12} /> Remove
                       </button>
@@ -124,7 +112,7 @@ const Cart = () => {
               ))}
             </div>
 
-            {/* Summary */}
+            {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-neutral-50 p-8 border border-neutral-100 sticky top-32">
                 <h2 className="text-[10px] uppercase font-bold tracking-[0.3em] mb-8 text-amber-900">
@@ -134,7 +122,7 @@ const Cart = () => {
                 <div className="space-y-4 text-xs font-medium uppercase tracking-widest border-b border-neutral-200 pb-6 mb-6">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>{formatPrice(subtotal)}</span>
+                    <span>{formatPrice(cartTotal)}</span>
                   </div>
                   <div className="flex justify-between text-neutral-400">
                     <span>Shipping</span>
@@ -144,7 +132,7 @@ const Cart = () => {
 
                 <div className="flex justify-between font-bold text-lg mb-8 uppercase tracking-tighter">
                   <span>Total</span>
-                  <span>{formatPrice(subtotal)}</span>
+                  <span>{formatPrice(cartTotal)}</span>
                 </div>
 
                 <button
@@ -161,6 +149,7 @@ const Cart = () => {
             </div>
           </div>
         ) : (
+          // Empty Cart State
           <div className="py-20 text-center space-y-6">
             <ShoppingBag size={48} className="mx-auto text-neutral-100" />
             <p className="text-neutral-400 uppercase tracking-widest text-xs font-bold">

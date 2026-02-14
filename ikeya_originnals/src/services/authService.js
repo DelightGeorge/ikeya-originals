@@ -2,14 +2,12 @@ import api from './api';
 
 // REGISTER
 export const register = async (userData) => {
-  // result: https://ikeya-backend.onrender.com/users/register
   const response = await api.post('/users/register', userData);
   return response.data;
 };
 
 // LOGIN
 export const login = async (credentials) => {
-  // result: https://ikeya-backend.onrender.com/users/login
   const response = await api.post('/users/login', credentials);
   
   if (response.data.token) {
@@ -26,10 +24,10 @@ export const forgotPassword = async (email) => {
 };
 
 // RESET PASSWORD
-export const resetPassword = async (token, password) => {
-  const response = await api.post(`/users/reset-password`, { 
-    token, 
-    password 
+export const resetPassword = async (token, password, confirmPassword) => {
+  const response = await api.post(`/users/reset-password?token=${token}`, { 
+    password,
+    confirmPassword
   });
   return response.data;
 };

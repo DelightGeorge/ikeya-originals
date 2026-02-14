@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import api from "../services/api";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
 import { useCart } from "../Context/CartContext";
+import LoadingScreen from "../components/LoadingScreen";
+import { formatPrice } from "../utils/formatters";
+import { MAX_FEATURED_PRODUCTS } from "../constants/products";
 import {
   Truck,
   ShieldCheck,
@@ -12,7 +15,6 @@ import {
   Heart,
   Scissors,
   ArrowRight,
-  Loader2,
   ShoppingBag,
 } from "lucide-react";
 
@@ -27,7 +29,7 @@ const Home = () => {
   const [fashionProducts, setFashionProducts] = useState([]);
   const [beautyProducts, setBeautyProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState(false);
+  const [error, setError] = useState({ fashion: false, beauty: false });
   const { addToBag } = useCart();
   const navigate = useNavigate();
 
@@ -48,6 +50,37 @@ const Home = () => {
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770814973/ikeya2_jhyfca.jpg",
   ];
 
+  const trustFeatures = useMemo(
+    () => [
+      { icon: <Truck size={18} />, text: "Nationwide" },
+      { icon: <ShieldCheck size={18} />, text: "Premium" },
+      { icon: <Star size={18} />, text: "Authentic" },
+      { icon: <RefreshCw size={18} />, text: "Returns" },
+    ],
+    []
+  );
+
+  const testimonials = useMemo(
+    () => [
+      {
+        name: "Amina O.",
+        quote:
+          "Ikeyá Designs is where I find pieces that represent my culture and my ambition.",
+      },
+      {
+        name: "Deborah K.",
+        quote:
+          "The Naturals growth oil is a staple in my routine. Organic, effective, and beautiful.",
+      },
+      {
+        name: "Tolu A.",
+        quote:
+          "The perfect synergy of fashion and wellness. This is the future of luxury.",
+      },
+    ],
+    []
+  );
+
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
@@ -55,9 +88,10 @@ const Home = () => {
         const fashionData = Array.isArray(fashionRes.data)
           ? fashionRes.data
           : fashionRes.data?.content ?? fashionRes.data?.products ?? [];
-        setFashionProducts(fashionData.slice(0, 4));
+        setFashionProducts(fashionData.slice(0, MAX_FEATURED_PRODUCTS));
       } catch (err) {
         console.error("Fashion fetch error:", err);
+        setError((prev) => ({ ...prev, fashion: true }));
       }
 
       try {
@@ -65,9 +99,10 @@ const Home = () => {
         const beautyData = Array.isArray(beautyRes.data)
           ? beautyRes.data
           : beautyRes.data?.content ?? beautyRes.data?.products ?? [];
-        setBeautyProducts(beautyData.slice(0, 4));
+        setBeautyProducts(beautyData.slice(0, MAX_FEATURED_PRODUCTS));
       } catch (err) {
         console.error("Beauty fetch error:", err);
+        setError((prev) => ({ ...prev, beauty: true }));
       }
 
       setLoading(false);
@@ -76,29 +111,14 @@ const Home = () => {
     fetchHomeData();
   }, []);
 
-  const formatPrice = (priceInKobo) => {
-    return new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-      minimumFractionDigits: 0,
-    }).format(priceInKobo / 100);
-  };
-
-  // ── Loading screen ──────────────────────────────────────────────────────────
   if (loading) {
     return (
       <Layout>
-        <div className="h-screen flex flex-col items-center justify-center bg-white">
-          <Loader2 className="animate-spin text-amber-900 mb-4" size={32} />
-          <p className="text-[10px] uppercase tracking-[0.4em] text-neutral-400 font-bold">
-            Entering the House of Ikeyá
-          </p>
-        </div>
+        <LoadingScreen message="Entering the House of Ikeyá" />
       </Layout>
     );
   }
 
-  // ── Main page ───────────────────────────────────────────────────────────────
   return (
     <Layout>
       {/* ================= HERO SECTION ================= */}
@@ -155,12 +175,7 @@ const Home = () => {
       {/* ================= TRUST BAR ================= */}
       <div className="bg-black py-8 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-6 text-white text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-center">
-          {[
-            { icon: <Truck size={18} />, text: "Nationwide" },
-            { icon: <ShieldCheck size={18} />, text: "Premium" },
-            { icon: <Star size={18} />, text: "Authentic" },
-            { icon: <RefreshCw size={18} />, text: "Returns" },
-          ].map((item, i) => (
+          {trustFeatures.map((item, i) => (
             <div
               key={i}
               className="flex flex-col md:flex-row items-center justify-center gap-3"
@@ -194,7 +209,19 @@ const Home = () => {
           </Link>
         </div>
 
-        {fashionProducts.length === 0 ? (
+        {error.fashion ? (
+          <div className="py-16 text-center">
+            <p className="text-neutral-400 text-xs uppercase tracking-widest mb-4">
+              Unable to load fashion collection
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-amber-800 text-xs uppercase tracking-widest font-bold hover:underline"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : fashionProducts.length === 0 ? (
           <div className="py-16 text-center text-neutral-300 text-xs uppercase tracking-widest">
             Collection coming soon
           </div>
@@ -255,7 +282,19 @@ const Home = () => {
             </Link>
           </div>
 
-          {beautyProducts.length === 0 ? (
+          {error.beauty ? (
+            <div className="py-16 text-center">
+              <p className="text-neutral-500 text-xs uppercase tracking-widest mb-4">
+                Unable to load beauty products
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-amber-600 text-xs uppercase tracking-widest font-bold hover:underline"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : beautyProducts.length === 0 ? (
             <div className="py-16 text-center text-neutral-500 text-xs uppercase tracking-widest">
               Products coming soon
             </div>
@@ -376,23 +415,7 @@ const Home = () => {
       {/* ================= TESTIMONIALS ================= */}
       <section className="py-28 px-6 max-w-7xl mx-auto bg-white">
         <div className="grid md:grid-cols-3 gap-16">
-          {[
-            {
-              name: "Amina O.",
-              quote:
-                "Ikeyá Designs is where I find pieces that represent my culture and my ambition.",
-            },
-            {
-              name: "Deborah K.",
-              quote:
-                "The Naturals growth oil is a staple in my routine. Organic, effective, and beautiful.",
-            },
-            {
-              name: "Tolu A.",
-              quote:
-                "The perfect synergy of fashion and wellness. This is the future of luxury.",
-            },
-          ].map((t, i) => (
+          {testimonials.map((t, i) => (
             <div key={i} className="text-left space-y-6">
               <p className="text-2xl font-display italic text-black leading-snug">
                 "{t.quote}"

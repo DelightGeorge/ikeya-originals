@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
-import { Filter, ShoppingBag, Loader2, AlertCircle, X } from "lucide-react";
+import LoadingScreen from "../components/LoadingScreen";
+import { formatPrice } from "../utils/formatters";
+import { PRODUCT_TYPES } from "../constants/products";
+import { Filter, ShoppingBag, AlertCircle, X } from "lucide-react";
 import { getProducts } from "../services/productService";
 import { useCart } from "../Context/CartContext";
 
@@ -10,7 +13,7 @@ const Shop = () => {
   const searchParams = new URLSearchParams(location.search);
 
   const searchQuery = searchParams.get("search")?.toLowerCase() || "";
-  const typeQuery = searchParams.get("type") || "All";
+  const typeQuery = searchParams.get("type") || PRODUCT_TYPES.ALL;
 
   const [activeCategory, setActiveCategory] = useState(typeQuery);
   const [products, setProducts] = useState([]);
@@ -23,10 +26,12 @@ const Shop = () => {
     const fetchShopData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await getProducts();
         setProducts(response.data);
       } catch (err) {
-        setError("Failed to connect to the server.");
+        console.error("Failed to fetch products:", err);
+        setError("Unable to load products. Please check your connection and try again.");
       } finally {
         setLoading(false);
       }
@@ -34,19 +39,33 @@ const Shop = () => {
     fetchShopData();
   }, []);
 
-  const filteredProducts = products.filter((p) => {
-    const matchesCategory =
-      activeCategory === "All" || p.type === activeCategory;
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchesCategory =
+        activeCategory === PRODUCT_TYPES.ALL || p.type === activeCategory;
 
-    const matchesSearch =
-      !searchQuery ||
-      p.name.toLowerCase().includes(searchQuery) ||
-      p.description?.toLowerCase().includes(searchQuery);
+      const matchesSearch =
+        !searchQuery ||
+        p.name.toLowerCase().includes(searchQuery) ||
+        p.description?.toLowerCase().includes(searchQuery);
 
-    return matchesCategory && matchesSearch;
-  });
+      return matchesCategory && matchesSearch;
+    });
+  }, [products, activeCategory, searchQuery]);
 
-  const categories = ["All", "FASHION", "BEAUTY"];
+  const categories = [
+    PRODUCT_TYPES.ALL,
+    PRODUCT_TYPES.FASHION,
+    PRODUCT_TYPES.BEAUTY,
+  ];
+
+  if (loading) {
+    return (
+      <Layout>
+        <LoadingScreen message="Curating Collection..." />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -96,17 +115,34 @@ const Shop = () => {
           </div>
         </div>
 
-        {loading ? (
+        {error ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="animate-spin text-amber-900 mb-4" size={32} />
-            <p className="text-[10px] uppercase tracking-widest text-black/40">
-              Curating Collection...
+            <AlertCircle size={32} className="mb-4 text-red-400" />
+            <p className="text-sm text-red-400 mb-6 text-center max-w-md">
+              {error}
             </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-black text-white px-8 py-3 text-xs uppercase tracking-widest font-bold hover:bg-amber-800 transition-all"
+            >
+              Try Again
+            </button>
           </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center py-20 text-red-400">
-            <AlertCircle size={32} className="mb-2" />
-            <p className="text-sm">{error}</p>
+        ) : filteredProducts.length === 0 ? (
+          <div className="py-20 text-center">
+            <p className="text-neutral-400 uppercase tracking-widest text-xs font-bold mb-6">
+              {searchQuery
+                ? `No products found matching "${searchQuery}"`
+                : "No products in this category yet"}
+            </p>
+            {searchQuery && (
+              <Link
+                to="/shop"
+                className="inline-block bg-black text-white px-8 py-3 text-xs uppercase tracking-widest font-bold hover:bg-amber-800 transition-all"
+              >
+                View All Products
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12">
@@ -122,9 +158,7 @@ const Shop = () => {
                   </Link>
 
                   <button
-                    onClick={() =>
-                      addToBag({ productId: p.id, quantity: 1 })
-                    }
+                    onClick={() => addToBag({ productId: p.id, quantity: 1 })}
                     className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
                   >
                     <ShoppingBag size={14} /> Add to Bag
@@ -141,7 +175,7 @@ const Shop = () => {
                     {p.type}
                   </p>
                   <p className="text-sm font-bold text-black mt-1">
-                    ₦{(p.price / 100).toLocaleString()}
+                    {formatPrice(p.price)}
                   </p>
                 </div>
               </div>

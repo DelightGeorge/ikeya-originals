@@ -5,8 +5,10 @@ import {
   Plus, Package, Users, ShoppingCart, TrendingUp,
   LayoutDashboard, Loader2, Trash2, ChevronDown,
   CheckCircle2, Clock, Truck, XCircle, RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import api from "../../services/api";
+import { deleteProduct as deleteProductService } from "../../services/productService";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -224,8 +226,10 @@ const Dashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingOrders, setLoadingOrders] = useState(true);
-  const [activeTab, setActiveTab] = useState("orders"); // "orders" | "products"
+  const [activeTab, setActiveTab] = useState("orders");
   const [stats, setStats] = useState({ products: 0, orders: 0, revenue: 0, paid: 0 });
+  const [deletingProductId, setDeletingProductId] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
 
   // ── Fetch products ──
   useEffect(() => {
@@ -273,16 +277,39 @@ const Dashboard = () => {
     );
   };
 
-  // ── Delete product ──
+  // ── Delete product with improved error handling ──
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this product?")) return;
+    if (!window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
+      return;
+    }
+
+    setDeletingProductId(id);
+    setDeleteError(null);
+
     try {
-      await api.delete(`/products/${id}`);
+      // Use the service function
+      await deleteProductService(id);
+      
+      // Update local state
       const updated = recentProducts.filter((p) => p.id !== id);
       setRecentProducts(updated);
       setStats((prev) => ({ ...prev, products: updated.length }));
+      
+      console.log("Product deleted successfully");
     } catch (err) {
-      alert("Failed to delete product.");
+      console.error("Delete product error:", err);
+      
+      // Extract error message
+      const errorMessage = err?.response?.data?.message || 
+                          err?.message || 
+                          "Failed to delete product. Please try again.";
+      
+      setDeleteError(errorMessage);
+      
+      // Show error to user
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setDeletingProductId(null);
     }
   };
 
@@ -308,6 +335,23 @@ const Dashboard = () => {
               <Plus size={16} /> Add New Product
             </button>
           </div>
+
+          {/* Error Alert */}
+          {deleteError && (
+            <div className="mb-6 bg-red-50 border border-red-200 p-4 rounded flex items-start gap-3">
+              <AlertCircle size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-red-900 mb-1">Delete Failed</p>
+                <p className="text-xs text-red-700">{deleteError}</p>
+              </div>
+              <button
+                onClick={() => setDeleteError(null)}
+                className="ml-auto text-red-400 hover:text-red-600"
+              >
+                <XCircle size={16} />
+              </button>
+            </div>
+          )}
 
           {/* ── Stats Grid ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
@@ -455,9 +499,15 @@ const Dashboard = () => {
                           </div>
                           <button
                             onClick={() => handleDelete(product.id)}
-                            className="text-neutral-300 hover:text-red-600 transition-all p-2"
+                            disabled={deletingProductId === product.id}
+                            className="text-neutral-300 hover:text-red-600 transition-all p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="Delete product"
                           >
-                            <Trash2 size={16} />
+                            {deletingProductId === product.id ? (
+                              <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                              <Trash2 size={16} />
+                            )}
                           </button>
                         </div>
                       </div>
@@ -495,7 +545,7 @@ const Dashboard = () => {
                 </div>
                 <div className="mt-8 pt-8 border-t border-neutral-800">
                   <p className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
-                    Ikeyá Admin v1.0.4
+                    Ikeyá Admin v1.0.5
                   </p>
                 </div>
               </div>
