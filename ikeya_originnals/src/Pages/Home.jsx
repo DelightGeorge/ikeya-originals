@@ -64,19 +64,19 @@ const Home = () => {
   const testimonials = useMemo(
     () => [
       {
-        name: "Amina O.",
+        name: "Stephanie.",
         quote:
-          "Ikeyá Designs is where I find pieces that represent my culture and my ambition.",
+          "I really love the oil and butter you sent me. Especially the scent of the oil. I dont know what you added but it smells sweet and minty at the same time. And i like how you made the butter this time... it looks and feels so good.",
       },
       {
-        name: "Deborah K.",
+        name: "Miss Toni.",
         quote:
-          "The Naturals growth oil is a staple in my routine. Organic, effective, and beautiful.",
+          "I really love my dress and the fact you made it perfectly without seeing me😍.",
       },
       {
-        name: "Tolu A.",
+        name: "Mercy Adigun.",
         quote:
-          "The perfect synergy of fashion and wellness. This is the future of luxury.",
+          "I like the texture and i noticed it makes my hair soft and easy to comb immediately after ive applied it. The smell it gives off is also very nice and refreshing. I will definitely be ordering again.",
       },
     ],
     []
