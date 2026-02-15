@@ -21,7 +21,7 @@ const About = () => {
               </h1>
               <div className="space-y-6">
                 <p className="text-neutral-500 text-lg leading-relaxed font-light">
-                  Based in the heart of Ketu, Lagos, Ikeyà Originals was born
+                  Based in the heart of Ketu, Lagos, Ikeyá Originals was born
                   from a simple yet powerful vision: to provide a home for the
                   modern individual who refuses to compromise on quality or
                   cultural identity.
@@ -99,7 +99,7 @@ const About = () => {
             Values
           </span>
           <h2 className="text-4xl md:text-5xl font-display text-black mb-20 uppercase tracking-tighter font-bold">
-            The Ikeyà Pillars
+            The Ikeyá Pillars
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16">

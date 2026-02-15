@@ -21,7 +21,7 @@ const Lookbook = () => {
       title: "Urban Crown",
       theme: "Protective Styling & Street Luxe",
       description:
-        "Showcasing our premium wigs and the Minimal Linen wear line for the woman on the go.",
+        "Showcasing our premium products and the Minimal Linen wear line for the woman on the go.",
       mainImage:
         "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_1400/v1770814973/ikeya2_jhyfca.jpg",
       featuredProducts: ["Linen Wear", "Satin Bonnet"],
@@ -55,7 +55,7 @@ const Lookbook = () => {
             </span>
           </h1>
           <p className="text-neutral-500 max-w-2xl mx-auto text-lg font-light leading-relaxed">
-            Explore the synergy of Ikeyà Fashion and Hair Care. Each look is a
+            Explore the synergy of Ikeyá Fashion and Hair Care. Each look is a
             testament to authenticity, blending modern luxury with African
             roots.
           </p>
