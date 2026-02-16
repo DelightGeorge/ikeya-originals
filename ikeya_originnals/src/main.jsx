@@ -11,8 +11,7 @@ import Shop from "./Pages/Shop";
 import Lookbook from "./Pages/Lookbook";
 import About from "./Pages/About";
 import Contact from "./Pages/Contact";
-import Auth from "./Pages/Auth"; // Correct
-// NOT: import { Auth } from './Pages/Auth';
+import Auth from "./Pages/Auth";
 import Cart from "./Pages/Cart";
 import Checkout from "./Pages/Checkout";
 import Order from "./Pages/Order";
@@ -25,12 +24,16 @@ import ResetPassword from "./Pages/ResetPassword";
 import AdminUsers from "./Pages/AdminUsers";
 import PaymentCallback from "./Pages/PaymentCallback";
 import OrderSuccess from "./Pages/OrderSuccess";
+import ProtectedRoute from "./Components/ProtectedRoute"; // ← ADD THIS IMPORT
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
+      // ============================================
+      // PUBLIC ROUTES - No login required
+      // ============================================
       {
         index: true,
         element: <Home />,
@@ -68,60 +71,97 @@ const router = createBrowserRouter([
         element: <Auth />,
       },
       {
-        path: "/cart",
-        element: <Cart />,
-      },
-      {
         path: "/auth",
         element: <Auth />,
       },
       {
-        path: "/checkout",
-        element: <Checkout />,
+        path: "/cart",
+        element: <Cart />, // Cart is public - guests can view
       },
       {
-        path: "/orders",
-        element: <Order />,
-      },
-      {
-        path: "/order-success",
-        element: <OrderSuccess />,
+        path: "/product/:id",
+        element: <ProductDetail />,
       },
       {
         path: "/verify-login",
         element: <VerifyLogin />,
       },
       {
-        path: "/payment-callback",
-        element: <PaymentCallback />,
-      },
-      {
-        path: "/admin/dashboard",
-        element: <Dashboard />,
-      },
-      {
-        path: "/admin/add-product",
-        element: <AddProduct />,
-      },
-      {
-        path: "/product/:id", // Dynamic route for single product
-        element: <ProductDetail />,
-      },
-      {
-        path: "/profile",
-        element: <Profile />,
-      },
-      {
         path: "/reset-password",
         element: <ResetPassword />,
       },
       {
+        path: "/payment-callback",
+        element: <PaymentCallback />,
+      },
+
+      // ============================================
+      // PROTECTED ROUTES - Login required
+      // ============================================
+      {
+        path: "/checkout",
+        element: (
+          <ProtectedRoute>
+            <Checkout />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/orders",
+        element: (
+          <ProtectedRoute>
+            <Order />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/order-success",
+        element: (
+          <ProtectedRoute>
+            <OrderSuccess />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+
+      // ============================================
+      // ADMIN ONLY ROUTES
+      // ============================================
+      {
+        path: "/admin/dashboard",
+        element: (
+          <ProtectedRoute adminOnly={true}>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/add-product",
+        element: (
+          <ProtectedRoute adminOnly={true}>
+            <AddProduct />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "/admin/users",
-        element: <AdminUsers />,
+        element: (
+          <ProtectedRoute adminOnly={true}>
+            <AdminUsers />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
 ]);
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <RouterProvider router={router} />
