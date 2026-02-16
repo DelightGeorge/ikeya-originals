@@ -7,15 +7,21 @@ import {
   Minus,
   ArrowRight,
   ShoppingBag,
+  LogIn,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../Context/CartContext";
 
 const Cart = () => {
-  const { cart, loading, updateQuantity, removeFromCart, cartTotal } = useCart();
+  const { cart, loading, isGuest, updateQuantity, removeFromCart, cartTotal } = useCart();
   const navigate = useNavigate();
 
   const handleProceedToCheckout = () => {
+    if (isGuest) {
+      // Redirect to login page if guest
+      navigate("/auth", { state: { from: "/cart" } });
+      return;
+    }
     navigate("/checkout", { state: { items: cart, subtotal: cartTotal } });
   };
 
@@ -135,16 +141,46 @@ const Cart = () => {
                   <span>{formatPrice(cartTotal)}</span>
                 </div>
 
+                {/* Guest Warning */}
+                {isGuest && (
+                  <div className="bg-amber-50 border border-amber-200 p-4 mb-4 rounded-sm">
+                    <p className="text-[10px] uppercase tracking-wider text-amber-900 text-center">
+                      Please log in to complete your purchase
+                    </p>
+                  </div>
+                )}
+
                 <button
                   onClick={handleProceedToCheckout}
                   className="w-full bg-black text-white py-5 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-amber-900 transition-all flex items-center justify-center gap-3 group"
                 >
-                  Proceed to Checkout
-                  <ArrowRight
-                    size={14}
-                    className="group-hover:translate-x-1 transition-transform"
-                  />
+                  {isGuest ? (
+                    <>
+                      <LogIn size={14} />
+                      Login to Checkout
+                    </>
+                  ) : (
+                    <>
+                      Proceed to Checkout
+                      <ArrowRight
+                        size={14}
+                        className="group-hover:translate-x-1 transition-transform"
+                      />
+                    </>
+                  )}
                 </button>
+
+                {isGuest && (
+                  <p className="text-xs text-center text-neutral-500 mt-4">
+                    Don't have an account?{" "}
+                    <Link 
+                      to="/auth" 
+                      className="text-amber-900 font-bold hover:underline"
+                    >
+                      Sign up
+                    </Link>
+                  </p>
+                )}
               </div>
             </div>
           </div>
