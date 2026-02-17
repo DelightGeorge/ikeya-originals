@@ -1,6 +1,6 @@
 import { useLocation, Link, Navigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
-import { CheckCircle2, Package, MapPin, ArrowRight, Download } from "lucide-react";
+import { CheckCircle2, Package, MapPin, ArrowRight, Download, Truck } from "lucide-react";
 
 const formatMoney = (kobo) =>
   new Intl.NumberFormat("en-NG", {
@@ -16,10 +16,9 @@ const formatDate = (d) =>
     year: "numeric",
   });
 
-// ─── Download receipt as a clean HTML file the browser can print/save as PDF ─
+// ─── Download receipt ─────────────────────────────────────────────────────────
 
-const downloadReceipt = (order) => {
-  const deliveryFee = 250000;
+const downloadReceipt = (order, deliveryFee) => {
   const subtotal = order.totalAmount - deliveryFee;
   const orderId = `#IKY-${order.id.slice(-8).toUpperCase()}`;
 
@@ -27,9 +26,9 @@ const downloadReceipt = (order) => {
     .map(
       (item) => `
       <tr>
-        <td style="padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:13px;">${item.product?.name || "—"}</td>
-        <td style="padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:13px; text-align:center;">×${item.quantity}</td>
-        <td style="padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:13px; text-align:right;">${formatMoney(item.price * item.quantity)}</td>
+        <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;">${item.product?.name || "—"}</td>
+        <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;text-align:center;">×${item.quantity}</td>
+        <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;text-align:right;">${formatMoney(item.price * item.quantity)}</td>
       </tr>`
     )
     .join("");
@@ -37,54 +36,47 @@ const downloadReceipt = (order) => {
   const html = `<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <title>Ikeyà Receipt — ${orderId}</title>
   <style>
-    @media print { body { -webkit-print-color-adjust: exact; } }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Georgia, serif; color: #111; background: #fff; padding: 60px 40px; max-width: 640px; margin: auto; }
-    h1 { text-transform: uppercase; letter-spacing: 8px; font-size: 28px; text-align: center; margin-bottom: 6px; }
-    .tagline { text-transform: uppercase; font-size: 9px; letter-spacing: 3px; color: #92400e; text-align: center; margin-bottom: 40px; }
-    .order-id { font-size: 18px; font-weight: bold; letter-spacing: 2px; }
-    .label { text-transform: uppercase; font-size: 9px; letter-spacing: 2px; color: #aaa; margin-bottom: 4px; margin-top: 20px; }
-    hr { border: none; border-top: 1px solid #eee; margin: 24px 0; }
-    table { width: 100%; border-collapse: collapse; }
-    th { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #aaa; padding-bottom: 8px; text-align: left; }
-    th:last-child { text-align: right; }
-    th:nth-child(2) { text-align: center; }
-    .total-row td { font-size: 15px; font-weight: bold; padding-top: 14px; border-top: 1px solid #eee; }
-    .ref { font-size: 10px; color: #aaa; text-align: center; margin-top: 32px; font-family: monospace; }
-    .footer { text-align: center; margin-top: 48px; font-size: 9px; text-transform: uppercase; letter-spacing: 3px; color: #ccc; }
+    @media print{body{-webkit-print-color-adjust:exact;}}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Georgia,serif;color:#111;background:#fff;padding:60px 40px;max-width:640px;margin:auto;}
+    h1{text-transform:uppercase;letter-spacing:8px;font-size:28px;text-align:center;margin-bottom:6px;}
+    .tagline{text-transform:uppercase;font-size:9px;letter-spacing:3px;color:#92400e;text-align:center;margin-bottom:40px;}
+    .order-id{font-size:18px;font-weight:bold;letter-spacing:2px;}
+    .label{text-transform:uppercase;font-size:9px;letter-spacing:2px;color:#aaa;margin-bottom:4px;margin-top:20px;}
+    hr{border:none;border-top:1px solid #eee;margin:24px 0;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#aaa;padding-bottom:8px;text-align:left;}
+    th:last-child{text-align:right;}
+    th:nth-child(2){text-align:center;}
+    .total-row td{font-size:15px;font-weight:bold;padding-top:14px;border-top:1px solid #eee;}
+    .ref{font-size:10px;color:#aaa;text-align:center;margin-top:32px;font-family:monospace;}
+    .footer{text-align:center;margin-top:48px;font-size:9px;text-transform:uppercase;letter-spacing:3px;color:#ccc;}
   </style>
 </head>
 <body>
   <h1>Ikeyà</h1>
   <p class="tagline">Originality is the only luxury</p>
-
   <div class="label">Order ID</div>
   <div class="order-id">${orderId}</div>
-
   <div class="label">Date</div>
   <div style="font-size:13px;">${formatDate(order.createdAt)}</div>
-
-  <hr />
-
+  ${order.deliveryArea ? `<div class="label">Delivery Area</div><div style="font-size:13px;">${order.deliveryArea}, ${order.deliveryState || ""}</div>` : ""}
+  <hr/>
   <div class="label">Items</div>
   <table>
-    <thead>
-      <tr>
-        <th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th>
-      </tr>
-    </thead>
+    <thead><tr><th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th></tr></thead>
     <tbody>
       ${itemsHtml}
       <tr>
-        <td style="padding:8px 0; font-size:12px; color:#888;" colspan="2">Subtotal</td>
-        <td style="padding:8px 0; font-size:12px; color:#888; text-align:right;">${formatMoney(subtotal)}</td>
+        <td style="padding:8px 0;font-size:12px;color:#888;" colspan="2">Subtotal</td>
+        <td style="padding:8px 0;font-size:12px;color:#888;text-align:right;">${formatMoney(subtotal)}</td>
       </tr>
       <tr>
-        <td style="padding:8px 0; font-size:12px; color:#888;" colspan="2">Delivery</td>
-        <td style="padding:8px 0; font-size:12px; color:#888; text-align:right;">${formatMoney(deliveryFee)}</td>
+        <td style="padding:8px 0;font-size:12px;color:#888;" colspan="2">Delivery${order.deliveryArea ? ` (${order.deliveryArea})` : ""}</td>
+        <td style="padding:8px 0;font-size:12px;color:#888;text-align:right;">${formatMoney(deliveryFee)}</td>
       </tr>
       <tr class="total-row">
         <td colspan="2">Total Paid</td>
@@ -92,15 +84,11 @@ const downloadReceipt = (order) => {
       </tr>
     </tbody>
   </table>
-
-  <hr />
-
+  <hr/>
   <div class="label">Shipping To</div>
-  <div style="font-size:13px; line-height:1.8;">${order.address}</div>
-  <div style="font-size:13px; color:#888; margin-top:4px;">${order.phone}</div>
-
+  <div style="font-size:13px;line-height:1.8;">${order.address}</div>
+  <div style="font-size:13px;color:#888;margin-top:4px;">${order.phone}</div>
   <p class="ref">Paystack Ref: ${order.paystackReference || "N/A"}</p>
-
   <div class="footer">© ${new Date().getFullYear()} Ikeyà Originals · Thank you for your order</div>
 </body>
 </html>`;
@@ -123,14 +111,16 @@ const OrderSuccess = () => {
   if (!order) return <Navigate to="/shop" replace />;
 
   const orderId = `#IKY-${order.id.slice(-8).toUpperCase()}`;
-  const deliveryFee = 250000;
+
+  // Delivery fee: prefer what was stored at checkout, else fall back to totalAmount - items sum
+  const deliveryFee = order.deliveryFee || 250000;
   const subtotal = order.totalAmount - deliveryFee;
 
   return (
     <Layout>
       <div className="pt-32 pb-24 px-6 max-w-3xl mx-auto">
 
-        {/* ── Success Header ── */}
+        {/* Success Header */}
         <div className="text-center mb-16">
           <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
             <CheckCircle2 size={40} className="text-green-600" strokeWidth={1} />
@@ -139,12 +129,12 @@ const OrderSuccess = () => {
             Order <span className="text-amber-900 italic">Confirmed</span>
           </h1>
           <p className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
-            A receipt has been sent to your email
+            A receipt has been sent to {order.customerEmail || "your email"}
           </p>
         </div>
 
-        {/* ── Receipt Card ── */}
-        <div className="border border-neutral-100 shadow-sm mb-10" id="receipt">
+        {/* Receipt Card */}
+        <div className="border border-neutral-100 shadow-sm mb-10">
 
           {/* Receipt Header */}
           <div className="bg-neutral-50 border-b border-neutral-100 px-8 py-6 flex justify-between items-start">
@@ -154,7 +144,7 @@ const OrderSuccess = () => {
               <p className="text-[10px] text-neutral-400 mt-1">{formatDate(order.createdAt)}</p>
             </div>
             <button
-              onClick={() => downloadReceipt(order)}
+              onClick={() => downloadReceipt(order, deliveryFee)}
               className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest border border-neutral-200 px-4 py-2.5 hover:bg-black hover:text-white hover:border-black transition-all"
             >
               <Download size={12} /> Download Receipt
@@ -201,7 +191,15 @@ const OrderSuccess = () => {
               <span>Subtotal</span><span>{formatMoney(subtotal)}</span>
             </div>
             <div className="flex justify-between text-[10px] uppercase tracking-widest font-bold text-neutral-400">
-              <span>Delivery</span><span>{formatMoney(deliveryFee)}</span>
+              <span>
+                Delivery
+                {order.deliveryArea && (
+                  <span className="normal-case font-normal ml-1 text-neutral-300">
+                    ({order.deliveryArea})
+                  </span>
+                )}
+              </span>
+              <span>{formatMoney(deliveryFee)}</span>
             </div>
             <div className="flex justify-between text-base font-bold uppercase tracking-widest pt-3 border-t border-neutral-100">
               <span>Total Paid</span><span>{formatMoney(order.totalAmount)}</span>
@@ -216,6 +214,17 @@ const OrderSuccess = () => {
             </div>
             <p className="text-sm text-neutral-700 leading-relaxed">{order.address}</p>
             <p className="text-xs text-neutral-400 mt-1">{order.phone}</p>
+
+            {/* Delivery area badge */}
+            {order.deliveryArea && (
+              <div className="mt-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-100 px-3 py-2">
+                <Truck size={11} className="text-amber-900" />
+                <span className="text-[9px] font-bold uppercase tracking-widest text-amber-900">
+                  {order.deliveryArea}, {order.deliveryState}
+                </span>
+              </div>
+            )}
+
             {order.paystackReference && (
               <p className="text-[9px] text-neutral-300 mt-4 font-mono">
                 Ref: {order.paystackReference}
@@ -224,7 +233,7 @@ const OrderSuccess = () => {
           </div>
         </div>
 
-        {/* ── Actions ── */}
+        {/* Actions */}
         <div className="flex flex-col items-center gap-5">
           <Link
             to="/shop"

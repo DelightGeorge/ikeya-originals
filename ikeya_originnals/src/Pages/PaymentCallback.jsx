@@ -12,11 +12,11 @@ import { toast } from "react-hot-toast";
  * Paystack redirects here after payment with:
  *   /payment-callback?reference=xxx&trxref=xxx
  *
- * This page:
- *  1. Reads `reference` from the URL
- *  2. Calls our backend to verify the payment
- *  3. On success → creates the order in the DB
- *  4. Navigates to /order-success
+ * Flow:
+ *  1. Read `reference` from URL
+ *  2. Verify payment via backend
+ *  3. Create order in DB (now includes deliveryFee, deliveryArea, deliveryState)
+ *  4. Navigate to /order-success
  */
 const PaymentCallback = () => {
   const [searchParams] = useSearchParams();
@@ -35,7 +35,7 @@ const PaymentCallback = () => {
 
     const handleVerification = async () => {
       try {
-        // Step 1: Verify payment with our backend (which calls Paystack)
+        // Step 1: Verify payment
         const verifyData = await verifyPayment(reference);
 
         if (verifyData?.data?.status !== "success") {
@@ -44,32 +44,50 @@ const PaymentCallback = () => {
           return;
         }
 
-        // Step 2: Retrieve pending order data saved before redirect
+        // Step 2: Retrieve pending order from sessionStorage
         const pending = JSON.parse(sessionStorage.getItem("pendingOrder"));
 
         if (!pending) {
           setStatus("error");
-          setErrorMessage("Order data was lost. Please contact support with your reference: " + reference);
+          setErrorMessage(
+            "Order data was lost. Please contact support with your reference: " + reference
+          );
           return;
         }
 
-        // Step 3: Create the order in the database now that payment is confirmed
-        // Uses the api.js instance which already has the Render base URL + auth token
+        // Step 3: Create the order — pass all the extra fields collected at checkout
         const orderRes = await api.post("/orders", {
           address: pending.address,
           phone: pending.phone,
+          alternatePhone: pending.alternatePhone || "",
+          name: pending.name || "",
+          email: pending.email || "",
+          companyName: pending.companyName || "",
+          deliveryNote: pending.deliveryNote || "",
+          deliveryArea: pending.deliveryArea || "",
+          deliveryState: pending.deliveryState || "",
+          deliveryFee: pending.deliveryFee || 0,
           paystackReference: reference,
         });
 
-        // Step 4: Clean up sessionStorage
+        // Step 4: Clean up
         sessionStorage.removeItem("pendingOrder");
 
         toast.success("Payment confirmed! Order placed.");
 
-        // Step 5: Navigate to success page
+        // Step 5: Navigate to success — pass full order + pending data for receipt display
         navigate("/order-success", {
           replace: true,
-          state: { order: orderRes.data },
+          state: {
+            order: {
+              ...orderRes.data,
+              // Merge in checkout data so OrderSuccess can show delivery breakdown
+              deliveryFee: pending.deliveryFee,
+              deliveryArea: pending.deliveryArea,
+              deliveryState: pending.deliveryState,
+              customerEmail: pending.email,
+            },
+          },
         });
       } catch (err) {
         console.error("Payment verification error:", err);
