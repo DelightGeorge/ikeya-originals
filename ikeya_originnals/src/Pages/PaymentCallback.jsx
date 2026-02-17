@@ -5,6 +5,7 @@ import { Loader2, XCircle } from "lucide-react";
 import { verifyPayment } from "../services/paymentService";
 import api from "../services/api";
 import { toast } from "react-hot-toast";
+import { useCart } from "../Context/CartContext";
 
 /**
  * PaymentCallback
@@ -15,12 +16,15 @@ import { toast } from "react-hot-toast";
  * Flow:
  *  1. Read `reference` from URL
  *  2. Verify payment via backend
- *  3. Create order in DB (now includes deliveryFee, deliveryArea, deliveryState)
- *  4. Navigate to /order-success
+ *  3. Create order in DB
+ *  4. Clear the cart
+ *  5. Navigate to /order-success
  */
 const PaymentCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { clearCart } = useCart();
+
   const reference = searchParams.get("reference") || searchParams.get("trxref");
 
   const [status, setStatus] = useState("verifying"); // "verifying" | "error"
@@ -55,35 +59,35 @@ const PaymentCallback = () => {
           return;
         }
 
-        // Step 3: Create the order — pass all the extra fields collected at checkout
+        // Step 3: Create the order in the database
         const orderRes = await api.post("/orders", {
-          address: pending.address,
-          phone: pending.phone,
-          alternatePhone: pending.alternatePhone || "",
-          name: pending.name || "",
-          email: pending.email || "",
-          companyName: pending.companyName || "",
-          deliveryNote: pending.deliveryNote || "",
-          deliveryArea: pending.deliveryArea || "",
-          deliveryState: pending.deliveryState || "",
-          deliveryFee: pending.deliveryFee || 0,
+          address:          pending.address,
+          phone:            pending.phone,
+          alternatePhone:   pending.alternatePhone  || "",
+          name:             pending.name            || "",
+          email:            pending.email           || "",
+          companyName:      pending.companyName     || "",
+          deliveryNote:     pending.deliveryNote    || "",
+          deliveryArea:     pending.deliveryArea    || "",
+          deliveryState:    pending.deliveryState   || "",
+          deliveryFee:      pending.deliveryFee     || 0,
           paystackReference: reference,
         });
 
-        // Step 4: Clean up
+        // Step 4: Clear sessionStorage AND empty the cart
         sessionStorage.removeItem("pendingOrder");
+        await clearCart();
 
         toast.success("Payment confirmed! Order placed.");
 
-        // Step 5: Navigate to success — pass full order + pending data for receipt display
+        // Step 5: Navigate to success page
         navigate("/order-success", {
           replace: true,
           state: {
             order: {
               ...orderRes.data,
-              // Merge in checkout data so OrderSuccess can show delivery breakdown
-              deliveryFee: pending.deliveryFee,
-              deliveryArea: pending.deliveryArea,
+              deliveryFee:   pending.deliveryFee,
+              deliveryArea:  pending.deliveryArea,
               deliveryState: pending.deliveryState,
               customerEmail: pending.email,
             },
@@ -99,11 +103,12 @@ const PaymentCallback = () => {
     };
 
     handleVerification();
-  }, [reference, navigate]);
+  }, [reference, navigate, clearCart]);
 
   return (
     <Layout>
       <div className="pt-32 pb-24 px-6 max-w-xl mx-auto text-center">
+
         {status === "verifying" && (
           <div className="space-y-6">
             <Loader2
@@ -139,6 +144,7 @@ const PaymentCallback = () => {
             </button>
           </div>
         )}
+
       </div>
     </Layout>
   );
