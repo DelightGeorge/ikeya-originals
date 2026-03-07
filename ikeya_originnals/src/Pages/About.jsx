@@ -13,25 +13,25 @@ const About = () => {
                 Our Heritage
               </span>
               <h1 className="text-5xl md:text-7xl font-display text-black mb-8 uppercase tracking-tighter font-bold leading-none">
-                Fashion Meets <br />
+                Where Culture,{" "}
                 <span className="italic font-light text-amber-900">
-                  Authenticity
-                </span>
-                .
+                  Style &amp; Self-Care
+                </span>{" "}
+                Converge.
               </h1>
               <div className="space-y-6">
                 <p className="text-neutral-500 text-lg leading-relaxed font-light">
-                  Based in the heart of Ketu, Lagos, Ikeyá Originals was born
-                  from a simple yet powerful vision: to provide a home for the
-                  modern individual who refuses to compromise on quality or
-                  cultural identity.
+                  Born from the union of <strong className="text-black font-semibold">Ikeyemi + Ayomide</strong>,
+                  Ikeyá Originals is more than a brand — it's a celebration of identity, creativity,
+                  and care. Nestled in the heart of Ketu, Lagos, we honour tradition while embracing
+                  the modern world, crafting fashion that tells a story and haircare that nurtures
+                  your crown.
                 </p>
                 <p className="text-neutral-500 text-lg leading-relaxed font-light">
-                  We bridge the gap between contemporary fashion design and
-                  premium natural hair care. Every stitch in our garments and
-                  every drop in our oils is crafted with a customer-first
-                  mindset, ensuring that "originality" isn't just a name—it's a
-                  lifestyle.
+                  Every garment, every oil, every detail is created with intention — to empower,
+                  uplift, and inspire. Here, originality is not just a name; it's a way of life:
+                  celebrating who you are, honouring where you come from, and caring for what
+                  makes you shine.
                 </p>
               </div>
             </div>
@@ -68,9 +68,10 @@ const About = () => {
                   The Mission
                 </h2>
                 <p className="text-neutral-400 leading-relaxed text-lg font-light">
-                  To deliver exclusive fashion collections and premium hair care
-                  solutions that empower our clients to express their authentic
-                  selves with confidence and elegance.
+                  To create fashion and haircare experiences that celebrate your natural beauty,
+                  your heritage, and your individuality. Every collection and every oil is crafted
+                  to nurture your crown, elevate your style, and inspire confidence — so that
+                  expressing your authentic self feels effortless, joyful, and elegant.
                 </p>
               </div>
             </div>
@@ -107,22 +108,22 @@ const About = () => {
               {
                 icon: <Heart size={24} />,
                 title: "Authenticity",
-                desc: "True to our roots and your unique style.",
+                desc: "Every piece tells a story rooted in African heritage.",
               },
               {
                 icon: <Award size={24} />,
                 title: "Premium Quality",
-                desc: "Rigorous testing for every botanical drop.",
+                desc: "Premium materials and expert craftsmanship in every drop.",
               },
               {
                 icon: <Target size={24} />,
-                title: "Creativity",
-                desc: "Exclusive designs crafted in-house.",
+                title: "Sustainability",
+                desc: "Eco-conscious sourcing and ethical production always.",
               },
               {
                 icon: <Award size={24} />,
-                title: "Service",
-                desc: "Your experience is our masterpiece.",
+                title: "Innovation",
+                desc: "Traditional techniques reimagined with modern design.",
               },
             ].map((v, i) => (
               <div key={i} className="group space-y-6">
@@ -146,7 +147,7 @@ const About = () => {
         {/* --- RECOGNITION / CTA --- */}
         <section className="py-20 border-t border-neutral-100 max-w-4xl mx-auto px-6 text-center">
           <p className="text-black font-display text-2xl md:text-3xl italic leading-snug">
-            "Originality is not just a name—it's a lifestyle."
+            "Originality is not just a name — it's a lifestyle."
           </p>
         </section>
       </div>

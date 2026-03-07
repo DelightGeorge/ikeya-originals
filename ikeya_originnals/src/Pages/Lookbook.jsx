@@ -7,33 +7,33 @@ const Lookbook = () => {
     {
       id: 1,
       title: "The Heritage Bloom",
-      theme: "Cultural Elegance x Modern Silhouettes",
+      theme: "Cultural Elegance × Hair Wellness",
       description:
-        "A celebration of Adire fabrics paired with our signature growth oil for a healthy, glowing aesthetic.",
+        "Ikeyá Originals is born from the names Ikeyemi + Ayomide — a celebration of joy, heritage, and self-love. Our StyleXIkeya Adire-inspired fashion pairs with Ikeya Naturals' BotaniButter Growth Oil, so your style moves like art — and your hair thrives.",
       mainImage:
         "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_1400/v1770814975/ikeya1_hszczi.jpg",
-      featuredProducts: ["Adire Two-Piece", "Growth Oil"],
-      testimonial: "The way the fabric moves is magical. It feels like art.",
+      featuredProducts: ["Adire Two-Piece", "BotaniButter Growth Oil"],
+      testimonial:
+        "The way the fabric moves is magical, and my hair has never felt healthier.",
       client: "Sarah J., Lagos",
     },
     {
       id: 2,
       title: "Urban Crown",
-      theme: "Protective Styling & Street Luxe",
+      theme: "Everyday Luxe × Haircare Confidence",
       description:
-        "Showcasing our premium products and the Minimal Linen wear line for the woman on the go.",
+        "Ikeyá Originals is for the modern woman on the move: effortless style, nourished hair, and confidence in every step. StyleXIkeya's Minimal Linen meets Ikeya Naturals' growth oils, combining everyday luxury with haircare rooted in culture and care.",
       mainImage:
         "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_1400/v1770814973/ikeya2_jhyfca.jpg",
-      featuredProducts: ["Linen Wear", "Satin Bonnet"],
+      featuredProducts: ["Minimal Linen Blazer", "Satin Bonnet", "Growth Oil"],
       testimonial: "Finally, a brand that understands my hair and my style.",
       client: "Bisi A., Abuja",
     },
   ];
 
-  // Handle PDF download
   const handleDownloadPDF = () => {
     const link = document.createElement("a");
-    link.href = "/ikeya-lookbook-2025.pdf"; // ← References file in public folder
+    link.href = "/ikeya-lookbook-2025.pdf";
     link.download = "Ikeya-Lookbook-2025.pdf";
     document.body.appendChild(link);
     link.click();
@@ -56,8 +56,7 @@ const Lookbook = () => {
           </h1>
           <p className="text-neutral-500 max-w-2xl mx-auto text-lg font-light leading-relaxed">
             Explore the synergy of Ikeyá Fashion and Hair Care. Each look is a
-            testament to authenticity, blending modern luxury with African
-            roots.
+            testament to authenticity, blending modern luxury with African roots.
           </p>
           <div className="mt-12 flex justify-center gap-4">
             <button
@@ -74,7 +73,9 @@ const Lookbook = () => {
           {collections.map((item, index) => (
             <section
               key={item.id}
-              className={`flex flex-col ${index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"} gap-16 items-center max-w-7xl mx-auto px-6`}
+              className={`flex flex-col ${
+                index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
+              } gap-16 items-center max-w-7xl mx-auto px-6`}
             >
               {/* Image Side */}
               <div className="w-full lg:w-3/5 relative group overflow-hidden bg-neutral-100">
@@ -143,8 +144,57 @@ const Lookbook = () => {
           ))}
         </div>
 
+        {/* --- SHOP CATEGORIES INTRO BLOCK --- */}
+        <section className="mt-40 py-24 bg-neutral-50 px-6">
+          <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16">
+            {/* Fashion */}
+            <div className="border-l-4 border-amber-800 pl-8 space-y-4">
+              <span className="text-amber-800 uppercase tracking-[0.4em] text-[10px] font-bold block">
+                StyleXIkeya
+              </span>
+              <h3 className="text-3xl font-display font-bold uppercase tracking-tighter text-black">
+                Heritage Meets Modern
+              </h3>
+              <p className="text-neutral-500 text-base leading-relaxed font-light">
+                Explore our Adire-inspired pieces and Minimalist Linen designs.
+                Every outfit celebrates culture, confidence, and effortless
+                elegance — designed for the woman who moves through life with
+                purpose and style.
+              </p>
+              <Link
+                to="/shop"
+                className="inline-block mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-black border-b border-black pb-1 hover:text-amber-800 hover:border-amber-800 transition-all"
+              >
+                Browse Fashion →
+              </Link>
+            </div>
+
+            {/* Haircare */}
+            <div className="border-l-4 border-amber-800 pl-8 space-y-4">
+              <span className="text-amber-800 uppercase tracking-[0.4em] text-[10px] font-bold block">
+                Ikeya Naturals
+              </span>
+              <h3 className="text-3xl font-display font-bold uppercase tracking-tighter text-black">
+                Nurture Your Crown
+              </h3>
+              <p className="text-neutral-500 text-base leading-relaxed font-light">
+                Discover our BotaniButter Growth Oils, moisturisers, and
+                protective haircare solutions. Designed to nourish, strengthen,
+                and celebrate your natural hair — because self-care starts at
+                the roots.
+              </p>
+              <Link
+                to="/shop"
+                className="inline-block mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-black border-b border-black pb-1 hover:text-amber-800 hover:border-amber-800 transition-all"
+              >
+                Browse Haircare →
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* --- CLIENT SHOWCASE GRID (BLACK THEME) --- */}
-        <section className="mt-48 bg-black py-32 px-6">
+        <section className="mt-0 bg-black py-32 px-6">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-20">
               <span className="text-amber-600 uppercase tracking-[0.5em] text-[10px] font-bold mb-4 block">
@@ -192,11 +242,7 @@ const Lookbook = () => {
                       alt="Ikeyà Community"
                       className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
                     />
-
-                    {/* Soft Overlay */}
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition duration-500"></div>
-
-                    {/* Instagram Icon */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-500">
                       <div className="bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-xl">
                         <Instagram

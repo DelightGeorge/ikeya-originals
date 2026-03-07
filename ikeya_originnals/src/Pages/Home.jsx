@@ -3,7 +3,6 @@ import api from "../services/api";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
 import { useCart } from "../Context/CartContext";
-import LoadingScreen from "../Components/LoadingScreen";
 import { formatPrice } from "../utils/formatters";
 import { MAX_FEATURED_PRODUCTS } from "../constants/products";
 import {
@@ -25,24 +24,50 @@ import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 
+// ─── Skeleton primitives ──────────────────────────────────────────────────────
+const Shimmer = ({ className = "" }) => (
+  <div
+    className={`animate-pulse bg-neutral-200 ${className}`}
+    aria-hidden="true"
+  />
+);
+
+// Skeleton for a single fashion card (3/4 portrait + two lines)
+const FashionCardSkeleton = () => (
+  <div className="flex flex-col gap-3">
+    <Shimmer className="aspect-[3/4] w-full" />
+    <Shimmer className="h-3 w-3/4 rounded" />
+    <Shimmer className="h-3 w-1/3 rounded" />
+  </div>
+);
+
+// Skeleton for a single beauty card (square image + text block)
+const BeautyCardSkeleton = () => (
+  <div className="flex flex-col sm:flex-row bg-white/5 p-4 border border-white/5 gap-10 items-center">
+    <Shimmer className="w-full sm:w-1/2 aspect-square bg-neutral-700" />
+    <div className="w-full sm:w-1/2 space-y-4 pr-4">
+      <Shimmer className="h-3 w-1/3 rounded bg-neutral-700" />
+      <Shimmer className="h-6 w-3/4 rounded bg-neutral-700" />
+      <Shimmer className="h-4 w-1/4 rounded bg-neutral-700" />
+      <Shimmer className="h-10 w-full rounded bg-neutral-700" />
+      <Shimmer className="h-10 w-full rounded bg-neutral-700" />
+    </div>
+  </div>
+);
+// ─────────────────────────────────────────────────────────────────────────────
+
 const Home = () => {
   const [fashionProducts, setFashionProducts] = useState([]);
   const [beautyProducts, setBeautyProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  // Independent loading states so each section can show its skeleton
+  const [fashionLoading, setFashionLoading] = useState(true);
+  const [beautyLoading, setBeautyLoading] = useState(true);
   const [error, setError] = useState({ fashion: false, beauty: false });
+
   const { addToBag } = useCart();
   const navigate = useNavigate();
 
-  // Each hero image has a custom object-position so the subject is always
-  // well-framed on both mobile and desktop viewports.
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Each slide has its own inline style so you can fine-tune per image.
-  // objectPosition controls WHAT part of the photo stays visible in the frame.
-  //   "center center"  → centres the image (landscape / full-body shots)
-  //   "top center"     → anchors to the top (keeps faces / heads in frame)
-  //   "50% 20%"        → focal point sits 20% from top (slightly below top)
-  //
-  // If any image still looks off after deploying, just change its objectPosition.
   const heroImages = [
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770764193/ikeya/products/slrji7iim9uagvjq79c3.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770573948/ikeya/products/joel6urttprrzpm5acmb.jpg",
@@ -83,43 +108,42 @@ const Home = () => {
   );
 
   useEffect(() => {
-    const fetchHomeData = async () => {
+    // ✅ Fire BOTH requests in parallel — neither waits for the other
+    const fetchFashion = async () => {
       try {
-        const fashionRes = await api.get("/products/type/FASHION");
-        const fashionData = Array.isArray(fashionRes.data)
-          ? fashionRes.data
-          : fashionRes.data?.content ?? fashionRes.data?.products ?? [];
-        setFashionProducts(fashionData.slice(0, MAX_FEATURED_PRODUCTS));
+        const res = await api.get("/products/type/FASHION");
+        const data = Array.isArray(res.data)
+          ? res.data
+          : res.data?.content ?? res.data?.products ?? [];
+        setFashionProducts(data.slice(0, MAX_FEATURED_PRODUCTS));
       } catch (err) {
         console.error("Fashion fetch error:", err);
         setError((prev) => ({ ...prev, fashion: true }));
+      } finally {
+        setFashionLoading(false);
       }
+    };
 
+    const fetchBeauty = async () => {
       try {
-        const beautyRes = await api.get("/products/type/BEAUTY");
-        const beautyData = Array.isArray(beautyRes.data)
-          ? beautyRes.data
-          : beautyRes.data?.content ?? beautyRes.data?.products ?? [];
-        setBeautyProducts(beautyData.slice(0, MAX_FEATURED_PRODUCTS));
+        const res = await api.get("/products/type/BEAUTY");
+        const data = Array.isArray(res.data)
+          ? res.data
+          : res.data?.content ?? res.data?.products ?? [];
+        setBeautyProducts(data.slice(0, MAX_FEATURED_PRODUCTS));
       } catch (err) {
         console.error("Beauty fetch error:", err);
         setError((prev) => ({ ...prev, beauty: true }));
+      } finally {
+        setBeautyLoading(false);
       }
-
-      setLoading(false);
     };
 
-    fetchHomeData();
+    fetchFashion();
+    fetchBeauty();
   }, []);
 
-  if (loading) {
-    return (
-      <Layout>
-        <LoadingScreen message="Entering the House of Ikeyá" />
-      </Layout>
-    );
-  }
-
+  // No more full-screen loading gate — the page renders immediately
   return (
     <Layout>
       {/* ================= HERO SECTION ================= */}
@@ -210,7 +234,14 @@ const Home = () => {
           </Link>
         </div>
 
-        {error.fashion ? (
+        {fashionLoading ? (
+          // ✅ Skeleton grid — same shape as the real product grid
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            {Array.from({ length: MAX_FEATURED_PRODUCTS }).map((_, i) => (
+              <FashionCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : error.fashion ? (
           <div className="py-16 text-center">
             <p className="text-neutral-400 text-xs uppercase tracking-widest mb-4">
               Unable to load fashion collection
@@ -283,7 +314,14 @@ const Home = () => {
             </Link>
           </div>
 
-          {error.beauty ? (
+          {beautyLoading ? (
+            // ✅ Skeleton grid — dark variant to match the dark section
+            <div className="grid md:grid-cols-2 gap-12">
+              {Array.from({ length: MAX_FEATURED_PRODUCTS }).map((_, i) => (
+                <BeautyCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : error.beauty ? (
             <div className="py-16 text-center">
               <p className="text-neutral-500 text-xs uppercase tracking-widest mb-4">
                 Unable to load beauty products
@@ -371,7 +409,7 @@ const Home = () => {
                 <div className="flex items-center gap-4 text-amber-900">
                   <Scissors size={24} />
                   <h3 className="text-xl font-bold uppercase tracking-widest text-black">
-                   Style X Ikeyá
+                    Style X Ikeyá
                   </h3>
                 </div>
                 <p className="text-neutral-500 text-lg leading-relaxed border-l-2 border-neutral-100 pl-6">
