@@ -119,7 +119,7 @@ export const CartProvider = ({ children }) => {
   };
 
   // ─── addToBag ───────────────────────────────────────────────────────────────
-
+  // ✅ FIXED: Instant UI update + async API call in background
   const addToBag = async (productOrData, qty = 1) => {
     try {
       const currentToken = localStorage.getItem("token");
@@ -139,7 +139,7 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      // GUEST
+      // GUEST - Instant UI update
       if (!currentToken) {
         const guestCart = getGuestCart();
         const existingIndex = guestCart.findIndex(
@@ -150,27 +150,70 @@ export const CartProvider = ({ children }) => {
           guestCart[existingIndex].quantity += quantity;
           toast.success("Cart updated!");
         } else {
-          if (!product) { toast.error("Product information missing"); return; }
+          if (!product) { 
+            toast.error("Product information missing"); 
+            return; 
+          }
           guestCart.push({ id: generateGuestItemId(), productId, quantity, product });
           toast.success("Item added to cart!");
         }
 
+        // ✅ INSTANT: Update UI immediately
         saveGuestCart(guestCart);
         setCart(guestCart);
         return guestCart;
       }
 
-      // AUTHENTICATED
-      await api.post("/cart", { productId, quantity });
-      await fetchCart();
+      // AUTHENTICATED - Instant UI update + background sync
+      // ✅ CHANGED: Show toast and update UI instantly, then sync with backend
+      
+      // Optimistically add to local state
+      const newCartItem = {
+        id: `temp_${Date.now()}`, // Temporary ID
+        productId,
+        quantity,
+        product,
+      };
+
+      setCart((prev) => {
+        const existingIndex = prev.findIndex((item) => item.productId === productId);
+        if (existingIndex !== -1) {
+          // Item already in cart - increase quantity
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            quantity: updated[existingIndex].quantity + quantity,
+          };
+          return updated;
+        } else {
+          // New item
+          return [...prev, newCartItem];
+        }
+      });
+
       toast.success("Item added to cart!");
+
+      // ✅ SYNC IN BACKGROUND: Don't wait for this
+      api.post("/cart", { productId, quantity })
+        .then(() => {
+          // Refresh cart after successful API call
+          return api.get("/cart");
+        })
+        .then((response) => {
+          setCart(Array.isArray(response.data) ? response.data : []);
+        })
+        .catch((err) => {
+          console.error("Error syncing cart:", err);
+          // Optionally show error toast if needed
+          if (err.response?.status === 401) {
+            toast.error("Session expired. Please log in again.");
+            localStorage.removeItem("token");
+          }
+        });
+
     } catch (err) {
       console.error("Error adding to cart:", err);
-      if (err.response?.status === 401) {
-        toast.error("Please log in to sync your cart");
-      } else {
-        toast.error(err.response?.data?.message || "Failed to add item to cart");
-      }
+      toast.error("Failed to add item to cart");
       throw err;
     }
   };
@@ -179,7 +222,10 @@ export const CartProvider = ({ children }) => {
 
   const updateQuantity = async (itemId, quantity) => {
     try {
-      if (quantity <= 0) { await removeFromCart(itemId); return; }
+      if (quantity <= 0) { 
+        await removeFromCart(itemId); 
+        return; 
+      }
 
       const currentToken = localStorage.getItem("token");
 
@@ -194,8 +240,21 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      await api.patch(`/cart/${itemId}`, { quantity });
-      await fetchCart();
+      // ✅ INSTANT: Update UI first
+      setCart((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, quantity } : item
+        )
+      );
+
+      // Then sync in background
+      api.patch(`/cart/${itemId}`, { quantity })
+        .catch((err) => {
+          console.error("Error updating quantity:", err);
+          toast.error("Failed to update quantity");
+          // Refresh to get correct state
+          fetchCart();
+        });
     } catch (err) {
       console.error("Error updating quantity:", err);
       toast.error("Failed to update quantity");
@@ -216,9 +275,17 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      await api.delete(`/cart/${itemId}`);
-      await fetchCart();
+      // ✅ INSTANT: Remove from UI immediately
+      setCart((prev) => prev.filter((item) => item.id !== itemId));
       toast.success("Item removed");
+
+      // Then sync in background
+      api.delete(`/cart/${itemId}`)
+        .catch((err) => {
+          console.error("Error removing item:", err);
+          // Refresh if there was an error
+          fetchCart();
+        });
     } catch (err) {
       console.error("Error removing item:", err);
       toast.error("Failed to remove item");
@@ -237,10 +304,18 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      if (cart.length > 0) {
-        await Promise.all(cart.map((item) => api.delete(`/cart/${item.id}`)));
-      }
+      // ✅ INSTANT: Clear UI immediately
       setCart([]);
+
+      // Then sync in background
+      if (cart.length > 0) {
+        Promise.all(cart.map((item) => api.delete(`/cart/${item.id}`)))
+          .catch((err) => {
+            console.error("Error clearing cart:", err);
+            // Refresh if there was an error
+            fetchCart();
+          });
+      }
     } catch (err) {
       console.error("Error clearing cart:", err);
     }
