@@ -192,7 +192,7 @@ const StockEditor = ({ productId, initialQty, onSaved }) => {
     setSaving(true);
     setError(null);
     try {
-      await api.patch(`/products/${productId}/stock`, { stockQuantity: parsed });
+      await api.patch(`/products/${productId}/stock`, { stock: parsed });
       onSaved(productId, parsed);
       setEditing(false);
     } catch (err) {
