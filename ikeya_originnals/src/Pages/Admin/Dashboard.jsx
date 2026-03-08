@@ -172,7 +172,7 @@ const OrderRow = ({ order, onUpdate }) => {
 };
 
 // ─── StockEditor ─────────────────────────────────────────────────────────────
-// Inline edit widget for a product's stock quantity
+// ✅ FIXED: Uses 'stock' field (not stockQuantity)
 const StockEditor = ({ productId, initialQty, onSaved }) => {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(
@@ -192,6 +192,7 @@ const StockEditor = ({ productId, initialQty, onSaved }) => {
     setSaving(true);
     setError(null);
     try {
+      // ✅ FIXED: Send 'stock' not 'stockQuantity'
       await api.patch(`/products/${productId}/stock`, { stock: parsed });
       onSaved(productId, parsed);
       setEditing(false);
@@ -329,10 +330,19 @@ const Dashboard = () => {
     );
   };
 
-  // ── Stock saved callback ──
+  // ── Stock saved callback - with broadcast ──
   const handleStockSaved = (productId, newQty) => {
+    // ✅ Update dashboard state
     setRecentProducts((prev) =>
-      prev.map((p) => p.id === productId ? { ...p, stockQuantity: newQty } : p)
+      prev.map((p) => p.id === productId ? { ...p, stock: newQty } : p)
+    );
+    
+    // ✅ NEW: Broadcast to Shop/Home pages via custom event
+    // This allows them to update stock without refetching
+    window.dispatchEvent(
+      new CustomEvent('productStockUpdated', {
+        detail: { productId, stock: newQty }
+      })
     );
   };
 
@@ -358,10 +368,10 @@ const Dashboard = () => {
 
   // ── Inventory alerts ──
   const outOfStockProducts = recentProducts.filter(
-    (p) => typeof p.stockQuantity === "number" && p.stockQuantity === 0
+    (p) => typeof p.stock === "number" && p.stock === 0
   );
   const lowStockProducts = recentProducts.filter(
-    (p) => typeof p.stockQuantity === "number" && p.stockQuantity > 0 && p.stockQuantity <= 3
+    (p) => typeof p.stock === "number" && p.stock > 0 && p.stock <= 3
   );
 
   return (
@@ -539,7 +549,7 @@ const Dashboard = () => {
                         <div className="flex items-center gap-4 flex-shrink-0">
                           <StockEditor
                             productId={product.id}
-                            initialQty={product.stockQuantity}
+                            initialQty={product.stock}
                             onSaved={handleStockSaved}
                           />
                           <button
@@ -606,7 +616,7 @@ const Dashboard = () => {
                             {lowStockProducts.map((p) => (
                               <p key={p.id} className="text-[10px] text-neutral-300 font-light truncate">
                                 — {p.name}{" "}
-                                <span className="text-amber-500 font-bold">({p.stockQuantity} left)</span>
+                                <span className="text-amber-500 font-bold">({p.stock} left)</span>
                               </p>
                             ))}
                           </div>
@@ -636,7 +646,7 @@ const Dashboard = () => {
                           <div className="flex justify-between text-[9px]">
                             <span className="text-neutral-400 uppercase tracking-wide">In Stock</span>
                             <span className="text-green-400 font-bold">
-                              {recentProducts.filter(p => typeof p.stockQuantity === "number" && p.stockQuantity > 0).length}
+                              {recentProducts.filter(p => typeof p.stock === "number" && p.stock > 0).length}
                             </span>
                           </div>
                           <div className="flex justify-between text-[9px]">

@@ -115,6 +115,39 @@ const Home = () => {
     fetchBeauty();
   }, []);
 
+  // ✅ NEW: Listen for real-time stock updates from Dashboard
+  useEffect(() => {
+    const handleStockUpdate = (event) => {
+      const { productId, stock } = event.detail;
+      
+      // Update fashion products
+      setFashionProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, stock } : p
+        )
+      );
+      
+      // Update beauty products
+      setBeautyProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, stock } : p
+        )
+      );
+    };
+
+    window.addEventListener('productStockUpdated', handleStockUpdate);
+    return () => window.removeEventListener('productStockUpdated', handleStockUpdate);
+  }, []);
+
+  // ✅ FIXED: No async/await delay - instantly update UI
+  const handleAddToBag = (product) => {
+    addToBag({ 
+      productId: product.id, 
+      quantity: 1,
+      product // Pass full product object
+    });
+  };
+
   return (
     <Layout>
       {/* ================= HERO ================= */}
@@ -212,30 +245,44 @@ const Home = () => {
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-              {fashionProducts.map((p) => (
-                <div key={p.id} className="group flex flex-col h-full">
-                  <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden mb-5">
-                    <img
-                      onClick={() => navigate(`/product/${p.id}`)}
-                      src={p.imageUrl}
-                      alt={p.name}
-                      className="w-full h-full object-cover object-top grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105 cursor-pointer"
-                    />
-                    <button
-                      onClick={() => addToBag(p)}
-                      className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
-                    >
-                      <ShoppingBag size={14} /> Add to Bag
-                    </button>
+              {fashionProducts.map((p) => {
+                const outOfStock = typeof p.stock === "number" && p.stock <= 0;
+                return (
+                  <div key={p.id} className="group flex flex-col h-full">
+                    <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden mb-5">
+                      <img
+                        onClick={() => navigate(`/product/${p.id}`)}
+                        src={p.imageUrl}
+                        alt={p.name}
+                        className={`w-full h-full object-cover object-top grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105 cursor-pointer ${
+                          outOfStock ? "opacity-50" : ""
+                        }`}
+                      />
+                      {outOfStock ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                          <p className="text-white font-bold uppercase text-xs">Out of Stock</p>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleAddToBag(p)}
+                          className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
+                        >
+                          <ShoppingBag size={14} /> Add to Bag
+                        </button>
+                      )}
+                    </div>
+                    <Link to={`/product/${p.id}`}>
+                      <h3 className="font-bold text-sm uppercase tracking-widest text-black mb-1 hover:text-amber-800 transition-colors">
+                        {p.name}
+                      </h3>
+                    </Link>
+                    <p className="text-amber-900 font-medium text-sm">{formatPrice(p.price)}</p>
+                    {typeof p.stock === "number" && p.stock > 0 && p.stock <= 3 && (
+                      <p className="text-[10px] text-amber-700 font-bold uppercase mt-1">Only {p.stock} left</p>
+                    )}
                   </div>
-                  <Link to={`/product/${p.id}`}>
-                    <h3 className="font-bold text-sm uppercase tracking-widest text-black mb-1 hover:text-amber-800 transition-colors">
-                      {p.name}
-                    </h3>
-                  </Link>
-                  <p className="text-amber-900 font-medium text-sm">{formatPrice(p.price)}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* ── See More Fashion ── */}
@@ -290,47 +337,65 @@ const Home = () => {
           ) : (
             <>
               <div className="grid md:grid-cols-2 gap-12">
-                {beautyProducts.map((p) => (
-                  <div
-                    key={p.id}
-                    className="group flex flex-col sm:flex-row bg-white/5 p-4 rounded-none items-center gap-10 border border-white/5 hover:border-amber-800/50 transition-all duration-700"
-                  >
+                {beautyProducts.map((p) => {
+                  const outOfStock = typeof p.stock === "number" && p.stock <= 0;
+                  return (
                     <div
-                      onClick={() => navigate(`/product/${p.id}`)}
-                      className="w-full sm:w-1/2 aspect-square overflow-hidden transition-all duration-700 cursor-pointer"
+                      key={p.id}
+                      className={`group flex flex-col sm:flex-row bg-white/5 p-4 rounded-none items-center gap-10 border border-white/5 hover:border-amber-800/50 transition-all duration-700 ${
+                        outOfStock ? "opacity-60" : ""
+                      }`}
                     >
-                      <img
-                        src={p.imageUrl}
-                        alt={p.name}
-                        className="w-full h-full object-cover object-center grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="w-full sm:w-1/2 pr-4 text-center sm:text-left">
-                      <div className="flex items-center justify-center sm:justify-start gap-2 text-amber-600 mb-3">
-                        <Sparkles size={14} />
-                        <span className="text-[10px] uppercase tracking-[0.3em] font-bold">
-                          {p.category?.name || "Organic"}
-                        </span>
+                      <div
+                        onClick={() => navigate(`/product/${p.id}`)}
+                        className="w-full sm:w-1/2 aspect-square overflow-hidden transition-all duration-700 cursor-pointer relative"
+                      >
+                        <img
+                          src={p.imageUrl}
+                          alt={p.name}
+                          className="w-full h-full object-cover object-center grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                        />
+                        {outOfStock && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                            <p className="text-white font-bold uppercase text-xs">Out of Stock</p>
+                          </div>
+                        )}
                       </div>
-                      <h3 className="text-2xl font-display font-bold mb-2 uppercase tracking-tight">{p.name}</h3>
-                      <p className="text-xl text-white font-light mb-6 italic">{formatPrice(p.price)}</p>
-                      <div className="flex flex-col gap-3">
-                        <button
-                          onClick={() => addToBag(p)}
-                          className="w-full bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-amber-800 hover:text-white transition-all flex items-center justify-center gap-2"
-                        >
-                          <ShoppingBag size={14} /> Add to Bag
-                        </button>
-                        <Link
-                          to={`/product/${p.id}`}
-                          className="block w-full text-center border border-white/30 text-white py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:border-white transition-all"
-                        >
-                          View Details
-                        </Link>
+                      <div className="w-full sm:w-1/2 pr-4 text-center sm:text-left">
+                        <div className="flex items-center justify-center sm:justify-start gap-2 text-amber-600 mb-3">
+                          <Sparkles size={14} />
+                          <span className="text-[10px] uppercase tracking-[0.3em] font-bold">
+                            {p.category?.name || "Organic"}
+                          </span>
+                        </div>
+                        <h3 className="text-2xl font-display font-bold mb-2 uppercase tracking-tight">{p.name}</h3>
+                        <p className="text-xl text-white font-light mb-6 italic">{formatPrice(p.price)}</p>
+                        {typeof p.stock === "number" && p.stock > 0 && p.stock <= 3 && (
+                          <p className="text-[10px] text-amber-500 font-bold uppercase mb-3">Only {p.stock} left</p>
+                        )}
+                        <div className="flex flex-col gap-3">
+                          <button
+                            onClick={() => handleAddToBag(p)}
+                            disabled={outOfStock}
+                            className={`w-full py-3 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all ${
+                              outOfStock
+                                ? "bg-neutral-600 text-neutral-400 cursor-not-allowed"
+                                : "bg-white text-black hover:bg-amber-800 hover:text-white"
+                            }`}
+                          >
+                            <ShoppingBag size={14} /> {outOfStock ? "Out of Stock" : "Add to Bag"}
+                          </button>
+                          <Link
+                            to={`/product/${p.id}`}
+                            className="block w-full text-center border border-white/30 text-white py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:border-white transition-all"
+                          >
+                            View Details
+                          </Link>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* ── See More Naturals ── */}

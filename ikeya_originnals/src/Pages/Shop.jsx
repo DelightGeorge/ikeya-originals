@@ -53,6 +53,21 @@ const Shop = () => {
     fetchShopData();
   }, []);
 
+  // ✅ NEW: Listen for real-time stock updates from Dashboard
+  useEffect(() => {
+    const handleStockUpdate = (event) => {
+      const { productId, stock } = event.detail;
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, stock } : p
+        )
+      );
+    };
+
+    window.addEventListener('productStockUpdated', handleStockUpdate);
+    return () => window.removeEventListener('productStockUpdated', handleStockUpdate);
+  }, []);
+
   // Sync category tab if URL param changes
   useEffect(() => {
     setActiveCategory(typeQuery);
@@ -76,8 +91,18 @@ const Shop = () => {
     { key: PRODUCT_TYPES.BEAUTY, label: "Ikeya Naturals" },
   ];
 
+  // ✅ FIXED: Check 'stock' field (not stockQuantity)
   const isOutOfStock = (p) =>
-    typeof p.stockQuantity === "number" && p.stockQuantity <= 0;
+    typeof p.stock === "number" && p.stock <= 0;
+
+  // ✅ FIXED: No async/await delay - instantly update UI
+  const handleAddToBag = (product) => {
+    addToBag({ 
+      productId: product.id, 
+      quantity: 1,
+      product // Pass full product object
+    });
+  };
 
   return (
     <Layout>
@@ -197,7 +222,7 @@ const Shop = () => {
                       </div>
                     ) : (
                       <button
-                        onClick={() => addToBag({ productId: p.id, quantity: 1 })}
+                        onClick={() => handleAddToBag(p)}
                         className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
                       >
                         <ShoppingBag size={14} /> Add to Bag
@@ -206,11 +231,11 @@ const Shop = () => {
 
                     {/* Low stock warning */}
                     {!outOfStock &&
-                      typeof p.stockQuantity === "number" &&
-                      p.stockQuantity > 0 &&
-                      p.stockQuantity <= 3 && (
+                      typeof p.stock === "number" &&
+                      p.stock > 0 &&
+                      p.stock <= 3 && (
                         <div className="absolute top-3 left-3 bg-amber-800 text-white text-[8px] font-bold uppercase tracking-widest px-2 py-1">
-                          Only {p.stockQuantity} left
+                          Only {p.stock} left
                         </div>
                       )}
                   </div>
