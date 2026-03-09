@@ -79,7 +79,6 @@ const StatusDropdown = ({ orderId, current, onUpdate }) => {
         <div className="absolute right-0 top-full mt-1 bg-white border border-neutral-200 shadow-lg z-50 min-w-[140px]">
           {STATUS_FLOW.map((s) => {
             const cfg = STATUS_CONFIG[s];
-            const Icon = cfg.icon;
             return (
               <button
                 key={s}
@@ -172,7 +171,6 @@ const OrderRow = ({ order, onUpdate }) => {
 };
 
 // ─── StockEditor ─────────────────────────────────────────────────────────────
-// ✅ FIXED: Uses 'stock' field (not stockQuantity)
 const StockEditor = ({ productId, initialQty, onSaved }) => {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(
@@ -192,7 +190,6 @@ const StockEditor = ({ productId, initialQty, onSaved }) => {
     setSaving(true);
     setError(null);
     try {
-      // ✅ FIXED: Send 'stock' not 'stockQuantity'
       await api.patch(`/products/${productId}/stock`, { stock: parsed });
       onSaved(productId, parsed);
       setEditing(false);
@@ -213,7 +210,6 @@ const StockEditor = ({ productId, initialQty, onSaved }) => {
   if (!editing) {
     return (
       <div className="flex items-center gap-2">
-        {/* Stock badge */}
         {qty === null ? (
           <span className="text-[9px] font-bold text-neutral-300 uppercase tracking-widest">—</span>
         ) : qty === 0 ? (
@@ -256,14 +252,12 @@ const StockEditor = ({ productId, initialQty, onSaved }) => {
           onClick={handleSave}
           disabled={saving}
           className="text-green-600 hover:text-green-800 transition-colors p-1 disabled:opacity-50"
-          title="Save"
         >
           {saving ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
         </button>
         <button
           onClick={handleCancel}
           className="text-neutral-400 hover:text-red-600 transition-colors p-1"
-          title="Cancel"
         >
           <X size={13} />
         </button>
@@ -276,7 +270,7 @@ const StockEditor = ({ productId, initialQty, onSaved }) => {
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [recentProducts, setRecentProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingOrders, setLoadingOrders] = useState(true);
@@ -285,13 +279,13 @@ const Dashboard = () => {
   const [deletingProductId, setDeletingProductId] = useState(null);
   const [deleteError, setDeleteError] = useState(null);
 
-  // ── Fetch products ──
+  // ✅ FIXED: fetch /products to get ALL products (not capped at 5)
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await api.get("/products/recentProducts");
-        const data = Array.isArray(res.data) ? res.data : res.data.data || [];
-        setRecentProducts(data);
+        const res = await api.get("/products");
+        const data = Array.isArray(res.data) ? res.data : [];
+        setAllProducts(data);
         setStats((prev) => ({ ...prev, products: data.length }));
       } catch (err) {
         console.error("Products fetch error:", err);
@@ -302,7 +296,6 @@ const Dashboard = () => {
     fetchProducts();
   }, []);
 
-  // ── Fetch orders ──
   const fetchOrders = useCallback(async () => {
     setLoadingOrders(true);
     try {
@@ -330,47 +323,37 @@ const Dashboard = () => {
     );
   };
 
-  // ── Stock saved callback - with broadcast ──
   const handleStockSaved = (productId, newQty) => {
-    // ✅ Update dashboard state
-    setRecentProducts((prev) =>
+    setAllProducts((prev) =>
       prev.map((p) => p.id === productId ? { ...p, stock: newQty } : p)
     );
-    
-    // ✅ NEW: Broadcast to Shop/Home pages via custom event
-    // This allows them to update stock without refetching
     window.dispatchEvent(
-      new CustomEvent('productStockUpdated', {
-        detail: { productId, stock: newQty }
-      })
+      new CustomEvent("productStockUpdated", { detail: { productId, stock: newQty } })
     );
   };
 
-  // ── Delete product ──
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this product? This action cannot be undone.")) return;
     setDeletingProductId(id);
     setDeleteError(null);
     try {
       await deleteProductService(id);
-      const updated = recentProducts.filter((p) => p.id !== id);
-      setRecentProducts(updated);
+      const updated = allProducts.filter((p) => p.id !== id);
+      setAllProducts(updated);
       setStats((prev) => ({ ...prev, products: updated.length }));
     } catch (err) {
       console.error("Delete product error:", err);
       const msg = err?.response?.data?.message || err?.message || "Failed to delete product.";
       setDeleteError(msg);
-      alert(`Error: ${msg}`);
     } finally {
       setDeletingProductId(null);
     }
   };
 
-  // ── Inventory alerts ──
-  const outOfStockProducts = recentProducts.filter(
+  const outOfStockProducts = allProducts.filter(
     (p) => typeof p.stock === "number" && p.stock === 0
   );
-  const lowStockProducts = recentProducts.filter(
+  const lowStockProducts = allProducts.filter(
     (p) => typeof p.stock === "number" && p.stock > 0 && p.stock <= 3
   );
 
@@ -414,10 +397,10 @@ const Dashboard = () => {
           {/* ── Stats Grid ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
             {[
-              { label: "Total Revenue",   value: formatPrice(stats.revenue), icon: TrendingUp },
-              { label: "Products",        value: stats.products,             icon: Package },
-              { label: "Total Orders",    value: stats.orders,               icon: ShoppingCart },
-              { label: "Paid Orders",     value: stats.paid,                 icon: CheckCircle2 },
+              { label: "Total Revenue", value: formatPrice(stats.revenue), icon: TrendingUp },
+              { label: "Products",      value: stats.products,             icon: Package },
+              { label: "Total Orders",  value: stats.orders,               icon: ShoppingCart },
+              { label: "Paid Orders",   value: stats.paid,                 icon: CheckCircle2 },
             ].map((stat, i) => (
               <div key={i} className="bg-white p-6 border border-neutral-100 shadow-sm flex flex-col justify-between h-36 transition-transform hover:scale-[1.02]">
                 <stat.icon size={18} className="text-amber-900" strokeWidth={1.5} />
@@ -432,8 +415,8 @@ const Dashboard = () => {
           {/* ── Tab Nav ── */}
           <div className="flex gap-0 mb-8 border-b border-neutral-200">
             {[
-              { key: "orders",   label: "Live Orders",  icon: ShoppingCart },
-              { key: "products", label: "Products",     icon: Package },
+              { key: "orders",   label: "Live Orders", icon: ShoppingCart },
+              { key: "products", label: "Products",    icon: Package },
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -506,7 +489,14 @@ const Dashboard = () => {
               <div className="lg:col-span-2 bg-white border border-neutral-100 shadow-sm p-8 min-h-[400px]">
                 <div className="flex items-center justify-between mb-8">
                   <h3 className="text-xs uppercase tracking-widest font-bold flex items-center gap-2">
-                    <LayoutDashboard size={14} /> Recent Products
+                    <LayoutDashboard size={14} />
+                    {/* ✅ Updated label */}
+                    All Products
+                    {allProducts.length > 0 && (
+                      <span className="text-neutral-400 font-normal normal-case tracking-normal text-[10px]">
+                        ({allProducts.length})
+                      </span>
+                    )}
                   </h3>
                   <p className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
                     Click <Edit3 size={9} className="inline" /> to edit stock
@@ -517,9 +507,9 @@ const Dashboard = () => {
                   <div className="flex justify-center items-center py-20">
                     <Loader2 className="animate-spin text-amber-900" size={24} />
                   </div>
-                ) : recentProducts.length > 0 ? (
+                ) : allProducts.length > 0 ? (
                   <div className="divide-y divide-neutral-100">
-                    {recentProducts.map((product) => (
+                    {allProducts.map((product) => (
                       <div
                         key={product.id}
                         className="flex items-center justify-between py-4 group hover:bg-neutral-50/60 px-2 transition-colors"
@@ -584,13 +574,12 @@ const Dashboard = () => {
                 </h3>
 
                 <div className="space-y-4 flex-grow">
-                  {recentProducts.length === 0 ? (
+                  {allProducts.length === 0 ? (
                     <p className="text-xs font-light leading-relaxed text-neutral-400">
                       Your digital gallery is currently empty. Start by adding products.
                     </p>
                   ) : (
                     <>
-                      {/* Out of stock */}
                       {outOfStockProducts.length > 0 && (
                         <div className="p-4 border border-red-900/50 bg-red-950/30">
                           <p className="text-[9px] uppercase text-red-400 font-bold mb-2 flex items-center gap-1.5">
@@ -606,7 +595,6 @@ const Dashboard = () => {
                         </div>
                       )}
 
-                      {/* Low stock */}
                       {lowStockProducts.length > 0 && (
                         <div className="p-4 border border-amber-900/40 bg-amber-950/20">
                           <p className="text-[9px] uppercase text-amber-500 font-bold mb-2 flex items-center gap-1.5">
@@ -623,30 +611,28 @@ const Dashboard = () => {
                         </div>
                       )}
 
-                      {/* All good */}
                       {outOfStockProducts.length === 0 && lowStockProducts.length === 0 && (
                         <div className="p-4 border border-neutral-800 bg-neutral-900/50">
                           <p className="text-[9px] uppercase text-green-500 font-bold mb-1 flex items-center gap-1.5">
                             <CheckCircle2 size={10} /> All Systems Go
                           </p>
                           <p className="text-xs text-neutral-400 font-light">
-                            {recentProducts.length} items live. No stock issues.
+                            {allProducts.length} items live. No stock issues.
                           </p>
                         </div>
                       )}
 
-                      {/* Summary */}
                       <div className="p-4 border border-neutral-800 bg-neutral-900/50 mt-2">
                         <p className="text-[9px] uppercase text-neutral-500 font-bold mb-2">Quick Summary</p>
                         <div className="space-y-1">
                           <div className="flex justify-between text-[9px]">
                             <span className="text-neutral-400 uppercase tracking-wide">Total Products</span>
-                            <span className="text-white font-bold">{recentProducts.length}</span>
+                            <span className="text-white font-bold">{allProducts.length}</span>
                           </div>
                           <div className="flex justify-between text-[9px]">
                             <span className="text-neutral-400 uppercase tracking-wide">In Stock</span>
                             <span className="text-green-400 font-bold">
-                              {recentProducts.filter(p => typeof p.stock === "number" && p.stock > 0).length}
+                              {allProducts.filter(p => typeof p.stock === "number" && p.stock > 0).length}
                             </span>
                           </div>
                           <div className="flex justify-between text-[9px]">
