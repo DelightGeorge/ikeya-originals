@@ -41,10 +41,8 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(true);
 
-  // ── Watch localStorage token so cart reacts when user logs in/out ──
   const [token, setToken] = useState(() => localStorage.getItem("token"));
 
-  // Poll for token changes (handles login/logout from AuthContext)
   useEffect(() => {
     const interval = setInterval(() => {
       const current = localStorage.getItem("token");
@@ -53,7 +51,6 @@ export const CartProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Re-fetch cart whenever token changes
   useEffect(() => {
     fetchCart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,24 +64,20 @@ export const CartProvider = ({ children }) => {
       const currentToken = localStorage.getItem("token");
 
       if (!currentToken) {
-        // Not logged in — use guest cart
         setCart(getGuestCart());
         setIsGuest(true);
         return;
       }
 
-      // Logged in — fetch from backend
       setIsGuest(false);
       const response = await api.get("/cart");
       const cartData = response.data;
       setCart(Array.isArray(cartData) ? cartData : []);
 
-      // Merge any guest items
       await mergeGuestCart();
     } catch (err) {
       console.error("Error fetching cart:", err);
       if (err.response?.status === 401) {
-        // Token invalid — treat as guest
         setCart(getGuestCart());
         setIsGuest(true);
       } else {
@@ -119,7 +112,7 @@ export const CartProvider = ({ children }) => {
   };
 
   // ─── addToBag ───────────────────────────────────────────────────────────────
-  // ✅ FIXED: Instant UI update + async API call in background
+
   const addToBag = async (productOrData, qty = 1) => {
     try {
       const currentToken = localStorage.getItem("token");
@@ -139,7 +132,16 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      // GUEST - Instant UI update
+      // ✅ STOCK GUARD: Block out-of-stock items before anything else
+      if (product && typeof product.stock === "number" && product.stock <= 0) {
+        toast.error("Sorry, this item is currently out of stock.", {
+          icon: "🚫",
+          duration: 3000,
+        });
+        return;
+      }
+
+      // GUEST
       if (!currentToken) {
         const guestCart = getGuestCart();
         const existingIndex = guestCart.findIndex(
@@ -150,26 +152,22 @@ export const CartProvider = ({ children }) => {
           guestCart[existingIndex].quantity += quantity;
           toast.success("Cart updated!");
         } else {
-          if (!product) { 
-            toast.error("Product information missing"); 
-            return; 
+          if (!product) {
+            toast.error("Product information missing");
+            return;
           }
           guestCart.push({ id: generateGuestItemId(), productId, quantity, product });
           toast.success("Item added to cart!");
         }
 
-        // ✅ INSTANT: Update UI immediately
         saveGuestCart(guestCart);
         setCart(guestCart);
         return guestCart;
       }
 
-      // AUTHENTICATED - Instant UI update + background sync
-      // ✅ CHANGED: Show toast and update UI instantly, then sync with backend
-      
-      // Optimistically add to local state
+      // AUTHENTICATED — optimistic update + background sync
       const newCartItem = {
-        id: `temp_${Date.now()}`, // Temporary ID
+        id: `temp_${Date.now()}`,
         productId,
         quantity,
         product,
@@ -178,7 +176,6 @@ export const CartProvider = ({ children }) => {
       setCart((prev) => {
         const existingIndex = prev.findIndex((item) => item.productId === productId);
         if (existingIndex !== -1) {
-          // Item already in cart - increase quantity
           const updated = [...prev];
           updated[existingIndex] = {
             ...updated[existingIndex],
@@ -186,25 +183,19 @@ export const CartProvider = ({ children }) => {
           };
           return updated;
         } else {
-          // New item
           return [...prev, newCartItem];
         }
       });
 
       toast.success("Item added to cart!");
 
-      // ✅ SYNC IN BACKGROUND: Don't wait for this
       api.post("/cart", { productId, quantity })
-        .then(() => {
-          // Refresh cart after successful API call
-          return api.get("/cart");
-        })
+        .then(() => api.get("/cart"))
         .then((response) => {
           setCart(Array.isArray(response.data) ? response.data : []);
         })
         .catch((err) => {
           console.error("Error syncing cart:", err);
-          // Optionally show error toast if needed
           if (err.response?.status === 401) {
             toast.error("Session expired. Please log in again.");
             localStorage.removeItem("token");
@@ -222,9 +213,9 @@ export const CartProvider = ({ children }) => {
 
   const updateQuantity = async (itemId, quantity) => {
     try {
-      if (quantity <= 0) { 
-        await removeFromCart(itemId); 
-        return; 
+      if (quantity <= 0) {
+        await removeFromCart(itemId);
+        return;
       }
 
       const currentToken = localStorage.getItem("token");
@@ -240,19 +231,16 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      // ✅ INSTANT: Update UI first
       setCart((prev) =>
         prev.map((item) =>
           item.id === itemId ? { ...item, quantity } : item
         )
       );
 
-      // Then sync in background
       api.patch(`/cart/${itemId}`, { quantity })
         .catch((err) => {
           console.error("Error updating quantity:", err);
           toast.error("Failed to update quantity");
-          // Refresh to get correct state
           fetchCart();
         });
     } catch (err) {
@@ -275,15 +263,12 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      // ✅ INSTANT: Remove from UI immediately
       setCart((prev) => prev.filter((item) => item.id !== itemId));
       toast.success("Item removed");
 
-      // Then sync in background
       api.delete(`/cart/${itemId}`)
         .catch((err) => {
           console.error("Error removing item:", err);
-          // Refresh if there was an error
           fetchCart();
         });
     } catch (err) {
@@ -304,15 +289,12 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      // ✅ INSTANT: Clear UI immediately
       setCart([]);
 
-      // Then sync in background
       if (cart.length > 0) {
         Promise.all(cart.map((item) => api.delete(`/cart/${item.id}`)))
           .catch((err) => {
             console.error("Error clearing cart:", err);
-            // Refresh if there was an error
             fetchCart();
           });
       }

@@ -6,6 +6,7 @@ import { PRODUCT_TYPES } from "../constants/products";
 import { Filter, ShoppingBag, AlertCircle, X } from "lucide-react";
 import { getProducts } from "../services/productService";
 import { useCart } from "../Context/CartContext";
+import { toast } from "react-hot-toast";
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
 const Shimmer = ({ className = "" }) => (
@@ -20,7 +21,6 @@ const ProductSkeleton = () => (
     <Shimmer className="h-3 w-1/3 rounded" />
   </div>
 );
-// ─────────────────────────────────────────────────────────────────────────────
 
 const Shop = () => {
   const location = useLocation();
@@ -53,22 +53,18 @@ const Shop = () => {
     fetchShopData();
   }, []);
 
-  // ✅ NEW: Listen for real-time stock updates from Dashboard
+  // Listen for real-time stock updates from Dashboard
   useEffect(() => {
     const handleStockUpdate = (event) => {
       const { productId, stock } = event.detail;
       setProducts((prev) =>
-        prev.map((p) =>
-          p.id === productId ? { ...p, stock } : p
-        )
+        prev.map((p) => p.id === productId ? { ...p, stock } : p)
       );
     };
-
-    window.addEventListener('productStockUpdated', handleStockUpdate);
-    return () => window.removeEventListener('productStockUpdated', handleStockUpdate);
+    window.addEventListener("productStockUpdated", handleStockUpdate);
+    return () => window.removeEventListener("productStockUpdated", handleStockUpdate);
   }, []);
 
-  // Sync category tab if URL param changes
   useEffect(() => {
     setActiveCategory(typeQuery);
   }, [typeQuery]);
@@ -91,17 +87,19 @@ const Shop = () => {
     { key: PRODUCT_TYPES.BEAUTY, label: "Ikeya Naturals" },
   ];
 
-  // ✅ FIXED: Check 'stock' field (not stockQuantity)
   const isOutOfStock = (p) =>
     typeof p.stock === "number" && p.stock <= 0;
 
-  // ✅ FIXED: No async/await delay - instantly update UI
+  // ✅ GUARD: Block out-of-stock before calling addToBag
   const handleAddToBag = (product) => {
-    addToBag({ 
-      productId: product.id, 
-      quantity: 1,
-      product // Pass full product object
-    });
+    if (isOutOfStock(product)) {
+      toast.error("Sorry, this item is currently out of stock.", {
+        icon: "🚫",
+        duration: 3000,
+      });
+      return;
+    }
+    addToBag({ productId: product.id, quantity: 1, product });
   };
 
   return (
@@ -221,6 +219,7 @@ const Shop = () => {
                         </div>
                       </div>
                     ) : (
+                      // ✅ Button only shown when IN stock — guard in handler too
                       <button
                         onClick={() => handleAddToBag(p)}
                         className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
