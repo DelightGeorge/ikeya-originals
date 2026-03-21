@@ -7,7 +7,7 @@ import { formatPrice } from "../utils/formatters";
 import { MAX_FEATURED_PRODUCTS } from "../constants/products";
 import {
   Truck, ShieldCheck, Star, RefreshCw, Sparkles,
-  Heart, Scissors, ArrowRight, ShoppingBag,
+  Heart, Scissors, ArrowRight, ShoppingBag, MessageCircle,
 } from "lucide-react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -17,7 +17,6 @@ import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 
-// ─── Skeleton primitives ──────────────────────────────────────────────────────
 const Shimmer = ({ className = "" }) => (
   <div className={`animate-pulse bg-neutral-200 ${className}`} aria-hidden="true" />
 );
@@ -42,7 +41,6 @@ const BeautyCardSkeleton = () => (
     </div>
   </div>
 );
-// ─────────────────────────────────────────────────────────────────────────────
 
 const Home = () => {
   const [fashionProducts, setFashionProducts] = useState([]);
@@ -115,42 +113,38 @@ const Home = () => {
     fetchBeauty();
   }, []);
 
-  // ✅ NEW: Listen for real-time stock updates from Dashboard
   useEffect(() => {
     const handleStockUpdate = (event) => {
       const { productId, stock } = event.detail;
-      
-      // Update fashion products
       setFashionProducts((prev) =>
-        prev.map((p) =>
-          p.id === productId ? { ...p, stock } : p
-        )
+        prev.map((p) => p.id === productId ? { ...p, stock } : p)
       );
-      
-      // Update beauty products
       setBeautyProducts((prev) =>
-        prev.map((p) =>
-          p.id === productId ? { ...p, stock } : p
-        )
+        prev.map((p) => p.id === productId ? { ...p, stock } : p)
       );
     };
-
     window.addEventListener('productStockUpdated', handleStockUpdate);
     return () => window.removeEventListener('productStockUpdated', handleStockUpdate);
   }, []);
 
-  // ✅ FIXED: No async/await delay - instantly update UI
+  const getWhatsAppUrl = (product) => {
+    const msg = encodeURIComponent(
+      `Hi! I'm interested in *${product.name}*. Could you help me with sizing, availability, and how to place an order?`
+    );
+    return `https://wa.me/+2349161270548?text=${msg}`;
+  };
+
   const handleAddToBag = (product) => {
-    addToBag({ 
-      productId: product.id, 
+    addToBag({
+      productId: product.id,
       quantity: 1,
-      product // Pass full product object
+      product,
     });
   };
 
   return (
     <Layout>
-      {/* ================= HERO ================= */}
+      {/* HERO */}
       <section className="relative w-full h-[85svh] md:h-screen overflow-hidden bg-black">
         <Swiper
           modules={[Autoplay, EffectFade, Pagination]}
@@ -201,7 +195,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ================= TRUST BAR ================= */}
+      {/* TRUST BAR */}
       <div className="bg-black py-8 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-6 text-white text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-center">
           {trustFeatures.map((item, i) => (
@@ -212,7 +206,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* ================= FASHION ================= */}
+      {/* FASHION */}
       <section className="py-24 px-6 max-w-7xl mx-auto bg-white">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-4">
           <div>
@@ -263,12 +257,14 @@ const Home = () => {
                           <p className="text-white font-bold uppercase text-xs">Out of Stock</p>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => handleAddToBag(p)}
-                          className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
+                        <a
+                          href={getWhatsAppUrl(p)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-green-600 hover:text-white"
                         >
-                          <ShoppingBag size={14} /> Add to Bag
-                        </button>
+                          <MessageCircle size={14} /> Enquire on WhatsApp
+                        </a>
                       )}
                     </div>
                     <Link to={`/product/${p.id}`}>
@@ -284,8 +280,6 @@ const Home = () => {
                 );
               })}
             </div>
-
-            {/* ── See More Fashion ── */}
             <div className="mt-14 text-center">
               <Link
                 to="/shop?type=FASHION"
@@ -299,7 +293,7 @@ const Home = () => {
         )}
       </section>
 
-      {/* ================= BEAUTY ================= */}
+      {/* BEAUTY */}
       <section className="py-28 bg-[#1a1a1a] text-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 border-l-4 border-amber-800 pl-8">
@@ -397,8 +391,6 @@ const Home = () => {
                   );
                 })}
               </div>
-
-              {/* ── See More Naturals ── */}
               <div className="mt-14 text-center">
                 <Link
                   to="/shop?type=BEAUTY"
@@ -413,7 +405,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ================= BRAND PHILOSOPHY ================= */}
+      {/* BRAND PHILOSOPHY */}
       <section className="py-32 px-6 bg-white border-b border-neutral-100">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-3 gap-16 items-start">
@@ -449,7 +441,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ================= FINAL CTA ================= */}
+      {/* FINAL CTA */}
       <section className="py-24 bg-amber-900 text-white text-center px-6">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-display font-bold uppercase tracking-tighter mb-4">
@@ -467,7 +459,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ================= TESTIMONIALS ================= */}
+      {/* TESTIMONIALS */}
       <section className="py-28 px-6 max-w-7xl mx-auto bg-white">
         <div className="grid md:grid-cols-3 gap-16">
           {testimonials.map((t, i) => (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import api from "../services/api"; // ✅ Changed from axios to api
+import api from "../services/api";
 import Layout from "../Shared/Layout/Layout";
 import { useCart } from "../Context/CartContext";
 import {
@@ -12,6 +12,8 @@ import {
   ShieldCheck,
   Truck,
   RefreshCw,
+  MessageCircle,
+  X,
 } from "lucide-react";
 
 const ProductDetail = () => {
@@ -21,6 +23,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
 
   const formatPrice = (priceInKobo) =>
     new Intl.NumberFormat("en-NG", {
@@ -73,8 +76,75 @@ const ProductDetail = () => {
       </Layout>
     );
 
+  const isFashion = product.type === "FASHION";
+  const whatsappMessage = encodeURIComponent(
+    `Hi! I'm interested in *${product.name}*. Could you help me with sizing, availability, and how to place an order?`
+  );
+  const whatsappUrl = `https://wa.me/+2349161270548?text=${whatsappMessage}`;
+
   return (
     <Layout>
+      {/* ── WhatsApp Modal ── */}
+      {showWhatsAppModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-6"
+          onClick={() => setShowWhatsAppModal(false)}
+        >
+          <div
+            className="bg-white max-w-sm w-full p-8 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowWhatsAppModal(false)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-black transition-colors"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-green-500 flex items-center justify-center">
+                <MessageCircle size={20} color="white" />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-amber-800 font-bold">
+                  Style X Ikeyá
+                </p>
+                <h3 className="text-lg font-display font-bold uppercase tracking-tight">
+                  Order via WhatsApp
+                </h3>
+              </div>
+            </div>
+
+            <p className="text-neutral-500 text-sm leading-relaxed mb-2">
+              Our fashion pieces are made-to-order and tailored to you. You'll be
+              redirected to WhatsApp to enquire about sizing, customisation, and
+              delivery directly with our team.
+            </p>
+
+            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-8">
+              You're enquiring about:{" "}
+              <span className="text-black font-bold">{product.name}</span>
+            </p>
+
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full bg-green-500 text-white py-4 text-center text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-green-600 transition-all mb-3"
+            >
+              Open WhatsApp
+            </a>
+
+            <a
+              href={`mailto:hello@ikeyaoriginnals.site?subject=Enquiry: ${product.name}`}
+              className="block w-full border border-neutral-200 text-black py-4 text-center text-[10px] font-bold uppercase tracking-[0.3em] hover:border-black transition-all"
+            >
+              Email Us Instead
+            </a>
+          </div>
+        </div>
+      )}
+
       <div className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-neutral-400 mb-12">
@@ -115,38 +185,62 @@ const ProductDetail = () => {
 
             <div className="h-[1px] bg-neutral-100 w-full mb-8" />
 
-            {/* Quantity Selector */}
-            <div className="flex flex-col gap-4 mb-10">
-              <span className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
-                Quantity
-              </span>
-              <div className="flex items-center border border-neutral-200 w-fit">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-4 hover:bg-neutral-50 transition-colors"
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="w-12 text-center text-sm font-bold">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="p-4 hover:bg-neutral-50 transition-colors"
-                >
-                  <Plus size={14} />
-                </button>
+            {/* Fashion enquiry notice */}
+            {isFashion && (
+              <div className="bg-amber-50 border border-amber-200 px-5 py-4 mb-8">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-amber-800 font-bold mb-1">
+                  Made-to-Order
+                </p>
+                <p className="text-xs text-amber-700 leading-relaxed">
+                  This piece is crafted specially for you. Tap below to enquire
+                  about sizing and availability via WhatsApp.
+                </p>
               </div>
-            </div>
+            )}
 
-            {/* Add to Bag Button */}
+            {/* Quantity Selector — only for Beauty */}
+            {!isFashion && (
+              <div className="flex flex-col gap-4 mb-10">
+                <span className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
+                  Quantity
+                </span>
+                <div className="flex items-center border border-neutral-200 w-fit">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-4 hover:bg-neutral-50 transition-colors"
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span className="w-12 text-center text-sm font-bold">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-4 hover:bg-neutral-50 transition-colors"
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* CTA Button */}
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <button
-                onClick={() => addToBag({ productId: product.id, quantity })}
-                className="grow bg-black text-white py-5 px-8 uppercase text-[10px] font-bold tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-amber-900 transition-all duration-500"
-              >
-                <ShoppingBag size={16} /> Add to Bag
-              </button>
+              {isFashion ? (
+                <button
+                  onClick={() => setShowWhatsAppModal(true)}
+                  className="grow bg-black text-white py-5 px-8 uppercase text-[10px] font-bold tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-green-600 transition-all duration-500"
+                >
+                  <MessageCircle size={16} /> Enquire on WhatsApp
+                </button>
+              ) : (
+                <button
+                  onClick={() => addToBag({ productId: product.id, quantity })}
+                  className="grow bg-black text-white py-5 px-8 uppercase text-[10px] font-bold tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-amber-900 transition-all duration-500"
+                >
+                  <ShoppingBag size={16} /> Add to Bag
+                </button>
+              )}
             </div>
 
             {/* Trust Badges */}
