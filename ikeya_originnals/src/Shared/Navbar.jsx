@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Search, ShoppingBag, User, Menu, X, LayoutDashboard, LogOut, Users } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, X, LayoutDashboard, LogOut, Users, MessageCircle, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../Context/CartContext";
+import { getProducts } from "../services/productService";
+import { formatPrice } from "../utils/formatters";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -11,14 +13,22 @@ const navLinks = [
   { name: "About", path: "/about" },
 ];
 
-// ─── Ikeyá SVG Logo Component ────────────────────────────────────────────────
+// ─── Debounce utility ─────────────────────────────────────────────────────────
+const debounce = (fn, delay) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+};
+
+// ─── Ikeyá SVG Logo ───────────────────────────────────────────────────────────
 const IkeyaLogo = ({ variant = "dark", className = "" }) => {
-  // variant: "dark" = black text (for white navbar), "light" = white text (for dark bg)
   const textColor   = variant === "light" ? "#f5f0eb" : "#0a0a0a";
   const accentStart = "#fbbf24";
   const accentMid   = "#d97706";
   const accentEnd   = "#92400e";
-  const labelColor  = variant === "light" ? "#b45309" : "#b45309";
+  const labelColor  = "#b45309";
 
   return (
     <svg
@@ -35,83 +45,102 @@ const IkeyaLogo = ({ variant = "dark", className = "" }) => {
           <stop offset="100%" stopColor={accentEnd}   />
         </linearGradient>
       </defs>
-
-      {/* "HOUSE OF" micro-label */}
-      <text
-        x="130" y="13"
-        textAnchor="middle"
-        fontFamily="'Cinzel', 'Optima', Georgia, serif"
-        fontSize="6.5"
-        fontWeight="400"
-        fill={labelColor}
-        letterSpacing="5"
-      >
-        HOUSE OF
-      </text>
-
-      {/* Main wordmark — IKEY */}
-      <text
-        x="19" y="50"
-        fontFamily="'Cormorant Garamond', 'Didot', Georgia, serif"
-        fontSize="44"
-        fontWeight="300"
-        fill={textColor}
-        letterSpacing="3"
-      >
-        IKEY
-      </text>
-
-      {/* Á — gold accent */}
-      <text
-        x="162" y="50"
-        fontFamily="'Cormorant Garamond', 'Didot', Georgia, serif"
-        fontSize="44"
-        fontWeight="300"
-        fill="url(#navGold)"
-        letterSpacing="3"
-      >
-        Á
-      </text>
-
-      {/* Thin amber underline beneath the Á */}
+      <text x="130" y="13" textAnchor="middle" fontFamily="'Cinzel', 'Optima', Georgia, serif" fontSize="6.5" fontWeight="400" fill={labelColor} letterSpacing="5">HOUSE OF</text>
+      <text x="19" y="50" fontFamily="'Cormorant Garamond', 'Didot', Georgia, serif" fontSize="44" fontWeight="300" fill={textColor} letterSpacing="3">IKEY</text>
+      <text x="162" y="50" fontFamily="'Cormorant Garamond', 'Didot', Georgia, serif" fontSize="44" fontWeight="300" fill="url(#navGold)" letterSpacing="3">Á</text>
       <line x1="160" y1="55" x2="198" y2="55" stroke="url(#navGold)" strokeWidth="1" />
-
-      {/* Divider dots */}
       <circle cx="211" cy="35" r="1.2" fill={accentMid} opacity="0.7" />
-
-      {/* "ORIGINALS" sub-label */}
-      <text
-        x="222" y="39"
-        fontFamily="'Cinzel', Georgia, serif"
-        fontSize="6"
-        fontWeight="400"
-        fill={labelColor}
-        letterSpacing="3"
-      >
-        ORIGINALS
-      </text>
+      <text x="222" y="39" fontFamily="'Cinzel', Georgia, serif" fontSize="6" fontWeight="400" fill={labelColor} letterSpacing="3">ORIGINALS</text>
     </svg>
   );
 };
-
 // ─────────────────────────────────────────────────────────────────────────────
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [menuOpen, setMenuOpen]             = useState(false);
+  const [searchOpen, setSearchOpen]         = useState(false);
+  const [displayQuery, setDisplayQuery]     = useState(""); // instant — shown in input
+  const [searchQuery, setSearchQuery]       = useState(""); // debounced — used for filtering
+  const [allProducts, setAllProducts]       = useState([]);
+  const [productsLoaded, setProductsLoaded] = useState(false);
   const { cartCount } = useCart();
+  const searchRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (query.trim()) {
-      navigate(`/shop?search=${encodeURIComponent(query.trim())}`);
-      setSearchOpen(false);
-      setQuery("");
+  // ── Debounced setter (300ms) ──
+  const debouncedSetSearch = useCallback(
+    debounce((val) => setSearchQuery(val), 300),
+    []
+  );
+
+  // ── Fetch all products once on first search open ──
+  useEffect(() => {
+    if (searchOpen && !productsLoaded) {
+      getProducts()
+        .then((res) => {
+          const data = Array.isArray(res.data)
+            ? res.data
+            : res.data?.content ?? res.data?.products ?? [];
+          setAllProducts(data);
+          setProductsLoaded(true);
+        })
+        .catch(() => setProductsLoaded(true));
     }
+  }, [searchOpen, productsLoaded]);
+
+  // ── Close on outside click ──
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        closeSearch();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ── Close on Escape ──
+  useEffect(() => {
+    const handleEsc = (e) => { if (e.key === "Escape") closeSearch(); };
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, []);
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setDisplayQuery("");
+    setSearchQuery("");
+  };
+
+  const handleInputChange = (e) => {
+    setDisplayQuery(e.target.value);        // input updates instantly
+    debouncedSetSearch(e.target.value);     // filter waits 300ms after typing stops
+  };
+
+  // ── Filter results against debounced query ──
+  const results = searchQuery.trim().length >= 1
+    ? allProducts
+        .filter((p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .slice(0, 5)
+    : [];
+
+  const handleSearchSubmit = (e) => {
+    if (e?.preventDefault) e.preventDefault();
+    if (displayQuery.trim()) {
+      navigate(`/shop?search=${encodeURIComponent(displayQuery.trim())}`);
+      closeSearch();
+    }
+  };
+
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
+    closeSearch();
   };
 
   const handleLogout = () => {
@@ -121,21 +150,37 @@ const Navbar = () => {
     setMenuOpen(false);
   };
 
+  const getWhatsAppUrl = (product) => {
+    const msg = encodeURIComponent(
+      `Hi! I'm interested in *${product.name}*. Could you help me with sizing, availability, and how to place an order?`
+    );
+    return `https://wa.me/+2349161270548?text=${msg}`;
+  };
+
+  // ── Highlight matching text ──
+  const highlightMatch = (text, query) => {
+    if (!query.trim()) return text;
+    const regex = new RegExp(`(${query.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+    const parts = text.split(regex);
+    return parts.map((part, i) =>
+      regex.test(part)
+        ? <mark key={i} className="bg-amber-100 text-amber-900 not-italic">{part}</mark>
+        : part
+    );
+  };
+
+  const showDropdown = searchOpen && displayQuery.trim().length >= 1;
+
   return (
     <header className="fixed top-0 left-0 w-full z-[100] bg-white border-b border-neutral-100">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between bg-white relative z-[110]">
 
-        {/* ── LOGO ── */}
-        <Link
-          to="/"
-          onClick={() => setMenuOpen(false)}
-          className="flex-shrink-0"
-          aria-label="Ikeyá — Home"
-        >
+        {/* LOGO */}
+        <Link to="/" onClick={() => setMenuOpen(false)} className="flex-shrink-0" aria-label="Ikeyá — Home">
           <IkeyaLogo variant="dark" className="h-12 w-auto" />
         </Link>
 
-        {/* ── DESKTOP NAV ── */}
+        {/* DESKTOP NAV */}
         <nav className="hidden lg:flex items-center gap-10">
           {navLinks.map((link) => (
             <NavLink
@@ -152,17 +197,22 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* ── ACTIONS & AUTH ── */}
+        {/* ACTIONS */}
         <div className="flex items-center gap-4 md:gap-6">
           <button
-            onClick={() => { setSearchOpen(!searchOpen); setMenuOpen(false); }}
+            onClick={() => {
+              setSearchOpen(!searchOpen);
+              setMenuOpen(false);
+              setDisplayQuery("");
+              setSearchQuery("");
+            }}
             className="hover:text-amber-900 transition-colors"
             aria-label="Search"
           >
             <Search size={18} strokeWidth={1.5} />
           </button>
 
-          {/* Auth section */}
+          {/* Auth */}
           <div className="flex items-center gap-4 border-x border-neutral-100 px-4 md:px-6">
             {user ? (
               <div className="flex items-center gap-4">
@@ -172,11 +222,7 @@ const Navbar = () => {
                     {user.name?.split(" ")[0]}
                   </span>
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-neutral-400 hover:text-red-600 transition-colors"
-                  title="Logout"
-                >
+                <button onClick={handleLogout} className="text-neutral-400 hover:text-red-600 transition-colors" title="Logout">
                   <LogOut size={16} strokeWidth={1.5} />
                 </button>
               </div>
@@ -185,8 +231,6 @@ const Navbar = () => {
                 <User size={18} strokeWidth={1.5} />
               </Link>
             )}
-
-            {/* Admin links — Desktop */}
             {user?.role === "ADMIN" && (
               <div className="hidden md:flex items-center gap-2 ml-2">
                 <Link to="/admin/dashboard" className="text-amber-900 hover:text-amber-700 transition-colors" title="Dashboard">
@@ -212,7 +256,7 @@ const Navbar = () => {
           {/* Mobile menu toggle */}
           <button
             className="lg:hidden flex items-center gap-2"
-            onClick={() => { setMenuOpen(!menuOpen); setSearchOpen(false); }}
+            onClick={() => { setMenuOpen(!menuOpen); closeSearch(); }}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
           >
             {menuOpen ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
@@ -220,25 +264,131 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* ── SEARCH BAR ── */}
+      {/* ── SEARCH BAR + LIVE DROPDOWN ── */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
+            ref={searchRef}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-20 left-0 w-full bg-white border-b border-neutral-100 p-6 z-[105] shadow-sm"
+            transition={{ duration: 0.2 }}
+            className="absolute top-20 left-0 w-full bg-white border-b border-neutral-100 z-[105] shadow-sm"
           >
-            <form onSubmit={handleSearchSubmit} className="max-w-3xl mx-auto flex items-center gap-4">
+            {/* Input row */}
+            <form onSubmit={handleSearchSubmit} className="max-w-3xl mx-auto flex items-center gap-4 px-6 py-5">
+              <Search size={16} className="text-neutral-300 flex-shrink-0" strokeWidth={1.5} />
               <input
                 autoFocus
-                placeholder="WHAT ARE YOU LOOKING FOR?"
-                className="w-full text-center text-sm font-bold tracking-widest uppercase outline-none"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                placeholder="SEARCH PRODUCTS..."
+                className="w-full text-sm font-bold tracking-widest uppercase outline-none placeholder:text-neutral-300 placeholder:font-normal text-black bg-transparent"
+                value={displayQuery}
+                onChange={handleInputChange}
               />
-              <button type="submit" className="hidden">Search</button>
+              {displayQuery && (
+                <button
+                  type="button"
+                  onClick={() => { setDisplayQuery(""); setSearchQuery(""); }}
+                  className="text-neutral-300 hover:text-black transition-colors flex-shrink-0"
+                >
+                  <X size={16} />
+                </button>
+              )}
             </form>
+
+            {/* Live results */}
+            <AnimatePresence>
+              {showDropdown && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="border-t border-neutral-100 max-w-3xl mx-auto"
+                >
+                  {results.length === 0 ? (
+                    <div className="px-6 py-8 text-center">
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400 font-bold">
+                        No products found for "{displayQuery}"
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {results.map((p, i) => {
+                        const outOfStock = typeof p.stock === "number" && p.stock <= 0;
+                        const isFashion  = p.type === "FASHION";
+
+                        return (
+                          <div
+                            key={p.id}
+                            className={`flex items-center gap-5 px-6 py-4 hover:bg-neutral-50 transition-colors cursor-pointer group ${
+                              i !== results.length - 1 ? "border-b border-neutral-50" : ""
+                            }`}
+                            onClick={() => handleProductClick(p.id)}
+                          >
+                            {/* Thumbnail */}
+                            <div className="w-14 h-14 flex-shrink-0 bg-neutral-100 overflow-hidden">
+                              <img
+                                src={p.imageUrl}
+                                alt={p.name}
+                                className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${
+                                  outOfStock ? "grayscale opacity-50" : ""
+                                }`}
+                              />
+                            </div>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[9px] uppercase tracking-[0.25em] text-amber-800 font-bold mb-0.5">
+                                {p.type}{p.category?.name ? ` / ${p.category.name}` : ""}
+                              </p>
+                              <h4 className="text-sm font-bold uppercase tracking-tight text-black truncate">
+                                {highlightMatch(p.name, searchQuery)}
+                              </h4>
+                              <p className="text-xs text-neutral-400 mt-0.5">
+                                {outOfStock
+                                  ? <span className="text-red-400 font-bold uppercase text-[9px] tracking-widest">Out of Stock</span>
+                                  : formatPrice(p.price)
+                                }
+                              </p>
+                            </div>
+
+                            {/* CTA — stops propagation so row click still goes to product page */}
+                            <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                              {!outOfStock && isFashion ? (
+                                <a
+                                  href={getWhatsAppUrl(p)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1.5 bg-green-500 text-white px-3 py-2 text-[9px] uppercase font-bold tracking-widest hover:bg-green-600 transition-colors whitespace-nowrap"
+                                >
+                                  <MessageCircle size={11} /> WhatsApp
+                                </a>
+                              ) : (
+                                <span className="flex items-center gap-1 text-[9px] uppercase tracking-widest font-bold text-neutral-400 group-hover:text-amber-800 transition-colors">
+                                  View <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* See all footer */}
+                      <div
+                        className="px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-neutral-50 transition-colors border-t border-neutral-100"
+                        onClick={handleSearchSubmit}
+                      >
+                        <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-neutral-400">
+                          See all results for "{displayQuery}"
+                        </span>
+                        <ArrowRight size={14} className="text-amber-800" />
+                      </div>
+                    </>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
@@ -253,8 +403,6 @@ const Navbar = () => {
             className="fixed inset-0 top-20 bg-white z-[100] lg:hidden flex flex-col overflow-y-auto"
           >
             <div className="flex flex-col p-8 pt-12 gap-8">
-
-              {/* Mobile logo — centered, light on dark not needed here; reuse dark variant */}
               <div className="flex justify-center mb-4">
                 <IkeyaLogo variant="dark" className="h-10 w-auto opacity-20" />
               </div>
@@ -273,15 +421,12 @@ const Navbar = () => {
                 </NavLink>
               ))}
 
-              {/* User section */}
               <div className="mt-10 border-t border-neutral-100 pt-10 flex flex-col gap-6">
                 {user ? (
                   <>
                     <Link to="/profile" onClick={() => setMenuOpen(false)} className="text-xs uppercase font-bold tracking-widest">
                       My Account
                     </Link>
-
-                    {/* Admin links — Mobile */}
                     {user.role === "ADMIN" && (
                       <div className="flex flex-col gap-4 pl-4 border-l-2 border-amber-800">
                         <span className="text-[8px] uppercase tracking-[0.3em] text-amber-800 font-bold">Admin</span>
@@ -293,7 +438,6 @@ const Navbar = () => {
                         </Link>
                       </div>
                     )}
-
                     <button onClick={handleLogout} className="text-xs uppercase font-bold tracking-widest text-red-500 text-left">
                       Logout
                     </button>
