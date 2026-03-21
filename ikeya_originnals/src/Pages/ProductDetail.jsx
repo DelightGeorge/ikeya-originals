@@ -3,10 +3,17 @@ import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
 import Layout from "../Shared/Layout/Layout";
 import { useCart } from "../Context/CartContext";
-import { toast } from "react-hot-toast";
 import {
-  Plus, Minus, ShoppingBag, ChevronRight,
-  Loader2, ShieldCheck, Truck, RefreshCw, XCircle,
+  Plus,
+  Minus,
+  ShoppingBag,
+  ChevronRight,
+  Loader2,
+  ShieldCheck,
+  Truck,
+  RefreshCw,
+  MessageCircle,
+  X,
 } from "lucide-react";
 
 const ProductDetail = () => {
@@ -16,6 +23,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
 
   const formatPrice = (priceInKobo) =>
     new Intl.NumberFormat("en-NG", {
@@ -39,22 +47,6 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  // ─── Stock helpers ────────────────────────────────────────────────────────
-  const isOutOfStock = (p) => typeof p?.stock === "number" && p.stock <= 0;
-  const isLowStock   = (p) => typeof p?.stock === "number" && p.stock > 0 && p.stock <= 3;
-
-  // ✅ GUARD: passes full product so CartContext can also verify stock
-  const handleAddToBag = () => {
-    if (isOutOfStock(product)) {
-      toast.error("Sorry, this item is currently out of stock.", {
-        icon: "🚫",
-        duration: 3000,
-      });
-      return;
-    }
-    addToBag({ productId: product.id, quantity, product });
-  };
-
   if (loading)
     return (
       <Layout>
@@ -71,49 +63,111 @@ const ProductDetail = () => {
     return (
       <Layout>
         <div className="h-[70vh] flex flex-col items-center justify-center text-center px-6">
-          <h2 className="text-2xl font-display mb-4 uppercase">Product Not Found</h2>
-          <Link to="/shop" className="text-xs font-bold uppercase tracking-widest border-b border-black pb-1">
+          <h2 className="text-2xl font-display mb-4 uppercase">
+            Product Not Found
+          </h2>
+          <Link
+            to="/shop"
+            className="text-xs font-bold uppercase tracking-widest border-b border-black pb-1"
+          >
             Return to Shop
           </Link>
         </div>
       </Layout>
     );
 
-  const outOfStock = isOutOfStock(product);
-  const lowStock   = isLowStock(product);
+  const isFashion = product.type === "FASHION";
+  const whatsappMessage = encodeURIComponent(
+    `Hi! I'm interested in *${product.name}*. Could you help me with sizing, availability, and how to place an order?`
+  );
+  const whatsappUrl = `https://wa.me/+2349161270548?text=${whatsappMessage}`;
 
   return (
     <Layout>
-      <div className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
+      {/* ── WhatsApp Modal ── */}
+      {showWhatsAppModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-6"
+          onClick={() => setShowWhatsAppModal(false)}
+        >
+          <div
+            className="bg-white max-w-sm w-full p-8 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowWhatsAppModal(false)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-black transition-colors"
+            >
+              <X size={18} />
+            </button>
 
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-green-500 flex items-center justify-center">
+                <MessageCircle size={20} color="white" />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-amber-800 font-bold">
+                  Style X Ikeyá
+                </p>
+                <h3 className="text-lg font-display font-bold uppercase tracking-tight">
+                  Order via WhatsApp
+                </h3>
+              </div>
+            </div>
+
+            <p className="text-neutral-500 text-sm leading-relaxed mb-2">
+              Our fashion pieces are made-to-order and tailored to you. You'll be
+              redirected to WhatsApp to enquire about sizing, customisation, and
+              delivery directly with our team.
+            </p>
+
+            <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-8">
+              You're enquiring about:{" "}
+              <span className="text-black font-bold">{product.name}</span>
+            </p>
+
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full bg-green-500 text-white py-4 text-center text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-green-600 transition-all mb-3"
+            >
+              Open WhatsApp
+            </a>
+
+            <a
+              href={`mailto:hello@ikeyaoriginnals.site?subject=Enquiry: ${product.name}`}
+              className="block w-full border border-neutral-200 text-black py-4 text-center text-[10px] font-bold uppercase tracking-[0.3em] hover:border-black transition-all"
+            >
+              Email Us Instead
+            </a>
+          </div>
+        </div>
+      )}
+
+      <div className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-neutral-400 mb-12">
-          <Link to="/" className="hover:text-black transition-colors">Home</Link>
+          <Link to="/" className="hover:text-black transition-colors">
+            Home
+          </Link>
           <ChevronRight size={10} />
-          <Link to="/shop" className="hover:text-black transition-colors">Shop</Link>
+          <Link to="/shop" className="hover:text-black transition-colors">
+            Shop
+          </Link>
           <ChevronRight size={10} />
           <span className="text-black font-bold">{product.name}</span>
         </nav>
 
         <div className="grid lg:grid-cols-2 gap-16 items-start">
-
           {/* LEFT: Image */}
           <div className="space-y-4">
-            <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden">
+            <div className="aspect-[3/4] bg-neutral-100 overflow-hidden">
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className={`w-full h-full object-cover transition-all ${outOfStock ? "grayscale-[50%] opacity-70" : ""}`}
+                className="w-full h-full object-cover"
               />
-              {/* Out of stock overlay on image */}
-              {outOfStock && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                  <div className="bg-black/80 text-white px-8 py-4 text-center">
-                    <XCircle size={24} className="mx-auto mb-2 text-red-400" />
-                    <p className="text-xs font-bold uppercase tracking-widest">Out of Stock</p>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
@@ -125,40 +179,27 @@ const ProductDetail = () => {
             <h1 className="text-4xl md:text-5xl font-display font-bold uppercase tracking-tight text-black mb-6">
               {product.name}
             </h1>
-            <p className="text-2xl text-black font-light mb-4">
+            <p className="text-2xl text-black font-light mb-8">
               {formatPrice(product.price)}
             </p>
 
-            {/* ── Stock Status ── */}
-            {outOfStock ? (
-              <div className="flex items-center gap-2 mb-6">
-                <span className="inline-flex items-center gap-1.5 bg-red-50 border border-red-200 text-red-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5">
-                  <XCircle size={11} /> Out of Stock
-                </span>
-                <span className="text-[10px] text-neutral-400 font-light">
-                  This item is currently unavailable
-                </span>
-              </div>
-            ) : lowStock ? (
-              <div className="mb-6">
-                <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5">
-                  Only {product.stock} left — order soon
-                </span>
-              </div>
-            ) : typeof product.stock === "number" && product.stock > 0 ? (
-              <div className="mb-6">
-                <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5">
-                  In Stock
-                </span>
-              </div>
-            ) : (
-              <div className="mb-6" /> /* no stock data — show nothing */
-            )}
-
             <div className="h-[1px] bg-neutral-100 w-full mb-8" />
 
-            {/* Quantity Selector — hidden when out of stock */}
-            {!outOfStock && (
+            {/* Fashion enquiry notice */}
+            {isFashion && (
+              <div className="bg-amber-50 border border-amber-200 px-5 py-4 mb-8">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-amber-800 font-bold mb-1">
+                  Made-to-Order
+                </p>
+                <p className="text-xs text-amber-700 leading-relaxed">
+                  This piece is crafted specially for you. Tap below to enquire
+                  about sizing and availability via WhatsApp.
+                </p>
+              </div>
+            )}
+
+            {/* Quantity Selector — only for Beauty */}
+            {!isFashion && (
               <div className="flex flex-col gap-4 mb-10">
                 <span className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
                   Quantity
@@ -170,7 +211,9 @@ const ProductDetail = () => {
                   >
                     <Minus size={14} />
                   </button>
-                  <span className="w-12 text-center text-sm font-bold">{quantity}</span>
+                  <span className="w-12 text-center text-sm font-bold">
+                    {quantity}
+                  </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
                     className="p-4 hover:bg-neutral-50 transition-colors"
@@ -181,18 +224,18 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {/* Add to Bag / Out of Stock Button */}
+            {/* CTA Button */}
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              {outOfStock ? (
+              {isFashion ? (
                 <button
-                  disabled
-                  className="grow bg-neutral-200 text-neutral-400 py-5 px-8 uppercase text-[10px] font-bold tracking-[0.3em] flex items-center justify-center gap-3 cursor-not-allowed"
+                  onClick={() => setShowWhatsAppModal(true)}
+                  className="grow bg-black text-white py-5 px-8 uppercase text-[10px] font-bold tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-green-600 transition-all duration-500"
                 >
-                  <XCircle size={16} /> Currently Out of Stock
+                  <MessageCircle size={16} /> Enquire on WhatsApp
                 </button>
               ) : (
                 <button
-                  onClick={handleAddToBag}
+                  onClick={() => addToBag({ productId: product.id, quantity })}
                   className="grow bg-black text-white py-5 px-8 uppercase text-[10px] font-bold tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-amber-900 transition-all duration-500"
                 >
                   <ShoppingBag size={16} /> Add to Bag
@@ -204,15 +247,21 @@ const ProductDetail = () => {
             <div className="grid grid-cols-3 gap-4 mb-12 py-6 border-y border-neutral-100">
               <div className="flex flex-col items-center text-center gap-2">
                 <Truck size={18} className="text-amber-800" />
-                <span className="text-[8px] uppercase tracking-tighter font-bold">Fast Delivery</span>
+                <span className="text-[8px] uppercase tracking-tighter font-bold">
+                  Fast Delivery
+                </span>
               </div>
               <div className="flex flex-col items-center text-center gap-2">
                 <ShieldCheck size={18} className="text-amber-800" />
-                <span className="text-[8px] uppercase tracking-tighter font-bold">Authentic</span>
+                <span className="text-[8px] uppercase tracking-tighter font-bold">
+                  Authentic
+                </span>
               </div>
               <div className="flex flex-col items-center text-center gap-2">
                 <RefreshCw size={18} className="text-amber-800" />
-                <span className="text-[8px] uppercase tracking-tighter font-bold">Easy Returns</span>
+                <span className="text-[8px] uppercase tracking-tighter font-bold">
+                  Easy Returns
+                </span>
               </div>
             </div>
 
@@ -235,7 +284,10 @@ const ProductDetail = () => {
               </div>
               <div className="text-neutral-500 text-sm leading-relaxed min-h-[100px]">
                 {activeTab === "description" ? (
-                  <p>{product.description || "No description available for this premium piece."}</p>
+                  <p>
+                    {product.description ||
+                      "No description available for this premium piece."}
+                  </p>
                 ) : (
                   <ul className="space-y-2">
                     <li>• Sustainably Sourced</li>

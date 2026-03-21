@@ -3,12 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import Layout from "../Shared/Layout/Layout";
 import { formatPrice } from "../utils/formatters";
 import { PRODUCT_TYPES } from "../constants/products";
-import { Filter, ShoppingBag, AlertCircle, X } from "lucide-react";
+import { Filter, ShoppingBag, AlertCircle, X, MessageCircle } from "lucide-react";
 import { getProducts } from "../services/productService";
 import { useCart } from "../Context/CartContext";
-import { toast } from "react-hot-toast";
 
-// ─── Skeleton ────────────────────────────────────────────────────────────────
 const Shimmer = ({ className = "" }) => (
   <div className={`animate-pulse bg-neutral-100 ${className}`} aria-hidden="true" />
 );
@@ -53,7 +51,6 @@ const Shop = () => {
     fetchShopData();
   }, []);
 
-  // Listen for real-time stock updates from Dashboard
   useEffect(() => {
     const handleStockUpdate = (event) => {
       const { productId, stock } = event.detail;
@@ -61,8 +58,8 @@ const Shop = () => {
         prev.map((p) => p.id === productId ? { ...p, stock } : p)
       );
     };
-    window.addEventListener("productStockUpdated", handleStockUpdate);
-    return () => window.removeEventListener("productStockUpdated", handleStockUpdate);
+    window.addEventListener('productStockUpdated', handleStockUpdate);
+    return () => window.removeEventListener('productStockUpdated', handleStockUpdate);
   }, []);
 
   useEffect(() => {
@@ -90,23 +87,26 @@ const Shop = () => {
   const isOutOfStock = (p) =>
     typeof p.stock === "number" && p.stock <= 0;
 
-  // ✅ GUARD: Block out-of-stock before calling addToBag
   const handleAddToBag = (product) => {
-    if (isOutOfStock(product)) {
-      toast.error("Sorry, this item is currently out of stock.", {
-        icon: "🚫",
-        duration: 3000,
-      });
-      return;
-    }
-    addToBag({ productId: product.id, quantity: 1, product });
+    addToBag({
+      productId: product.id,
+      quantity: 1,
+      product,
+    });
+  };
+
+  const getWhatsAppUrl = (product) => {
+    const msg = encodeURIComponent(
+      `Hi! I'm interested in *${product.name}*. Could you help me with sizing, availability, and how to place an order?`
+    );
+    return `https://wa.me/+2349161270548?text=${msg}`;
   };
 
   return (
     <Layout>
       <div className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
 
-        {/* ── Header ── */}
+        {/* Header */}
         <header className="mb-12 text-center">
           <span className="text-amber-800 uppercase tracking-[0.5em] text-[10px] font-bold block mb-4">
             The House of Ikeyá
@@ -136,7 +136,7 @@ const Shop = () => {
           )}
         </header>
 
-        {/* ── Filter Bar ── */}
+        {/* Filter Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center border-b border-neutral-100 pb-6 mb-10 gap-6">
           <div className="flex gap-8">
             {categories.map((cat) => (
@@ -160,7 +160,7 @@ const Shop = () => {
           </div>
         </div>
 
-        {/* ── Content ── */}
+        {/* Content */}
         {error ? (
           <div className="flex flex-col items-center justify-center py-20">
             <AlertCircle size={32} className="mb-4 text-red-400" />
@@ -198,6 +198,7 @@ const Shop = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-12">
             {filteredProducts.map((p) => {
               const outOfStock = isOutOfStock(p);
+              const isFashion = p.type === "FASHION";
               return (
                 <div key={p.id} className="group flex flex-col h-full">
                   <div className="relative aspect-[3/4] bg-neutral-50 overflow-hidden mb-4">
@@ -211,15 +212,22 @@ const Shop = () => {
                       />
                     </Link>
 
-                    {/* Out of stock overlay */}
                     {outOfStock ? (
                       <div className="absolute inset-0 flex items-end justify-center pb-4 px-4">
                         <div className="w-full bg-black/80 text-white py-3 text-[10px] uppercase font-bold tracking-widest text-center">
                           Out of Stock
                         </div>
                       </div>
+                    ) : isFashion ? (
+                      <a
+                        href={getWhatsAppUrl(p)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-green-600 hover:text-white"
+                      >
+                        <MessageCircle size={14} /> Enquire on WhatsApp
+                      </a>
                     ) : (
-                      // ✅ Button only shown when IN stock — guard in handler too
                       <button
                         onClick={() => handleAddToBag(p)}
                         className="absolute bottom-4 left-4 right-4 bg-white/95 text-black py-3 text-[10px] uppercase font-bold tracking-widest opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all flex items-center justify-center gap-2 hover:bg-black hover:text-white"
@@ -228,15 +236,11 @@ const Shop = () => {
                       </button>
                     )}
 
-                    {/* Low stock warning */}
-                    {!outOfStock &&
-                      typeof p.stock === "number" &&
-                      p.stock > 0 &&
-                      p.stock <= 3 && (
-                        <div className="absolute top-3 left-3 bg-amber-800 text-white text-[8px] font-bold uppercase tracking-widest px-2 py-1">
-                          Only {p.stock} left
-                        </div>
-                      )}
+                    {!outOfStock && typeof p.stock === "number" && p.stock > 0 && p.stock <= 3 && (
+                      <div className="absolute top-3 left-3 bg-amber-800 text-white text-[8px] font-bold uppercase tracking-widest px-2 py-1">
+                        Only {p.stock} left
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-auto space-y-1 text-center md:text-left">
