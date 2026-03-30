@@ -37,11 +37,11 @@ const About = () => {
             </div>
 
             <div className="relative order-1 lg:order-2">
-              <div className="overflow-hidden bg-neutral-100">
+              <div className="overflow-hidden rounded-lg shadow-2xl">
                 <img
                   src="https://res.cloudinary.com/dk8uaekik/image/upload/v1770900007/ikeya3_kjzvbe.jpg"
                   alt="Ikeyà Studio"
-                  className="w-full h-[550px] object-cover grayscale-[30%] transition-all duration-1000"
+                  className="w-full h-[550px] object-cover transition-all duration-1000"
                 />
               </div>
               <div className="absolute -bottom-8 -left-8 bg-black text-white p-10 hidden md:block shadow-2xl">
