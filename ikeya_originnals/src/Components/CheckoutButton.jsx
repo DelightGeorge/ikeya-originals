@@ -1,34 +1,38 @@
 import React from "react";
-import { initializePayment, verifyPayment } from "../services/paymentService";
+import { initializePayment } from "../services/paymentService";
 import { useNavigate } from "react-router-dom";
 
+// ✅ `amount` prop must always be in NAIRA (e.g. 5000, not 500000)
 const CheckoutButton = ({ amount }) => {
   const navigate = useNavigate();
 
   const handlePay = async () => {
     try {
-      // Initialize payment
-      const { data } = await initializePayment(amount);
+      const { data } = await initializePayment(amount); // sends naira as-is
 
-      if (data?.authorization_url) {
-        // Open Paystack checkout in new tab
-        const win = window.open(data.authorization_url, "_blank");
-
-        // Polling for verification (optional for instant verification)
-        const checkInterval = setInterval(async () => {
-          if (win.closed) {
-            clearInterval(checkInterval);
-            // Verify payment
-            const verify = await verifyPayment(data.reference);
-            if (verify.data.status === "success") {
-              // Payment confirmed, navigate to OrderSuccess
-              navigate("/order-success", { state: { order: { id: data.reference, totalAmount: amount } } });
-            } else {
-              alert("Payment failed or not completed.");
-            }
-          }
-        }, 1000);
+      if (!data?.authorization_url) {
+        alert("Could not get payment URL. Please try again.");
+        return;
       }
+
+      const win = window.open(data.authorization_url, "_blank");
+
+      if (!win) {
+        // Popup was blocked — fall back to same-tab redirect
+        window.location.href = data.authorization_url;
+        return;
+      }
+
+      // Poll until the popup closes, then let PaymentCallback handle verification.
+      // Avoid verifying here AND in PaymentCallback — that creates a race condition.
+      const checkInterval = setInterval(() => {
+        if (win.closed) {
+          clearInterval(checkInterval);
+          // Paystack will redirect to your callback URL after payment,
+          // so PaymentCallback.jsx handles verification automatically.
+          // Only use this polling path if you're NOT using a redirect callback.
+        }
+      }, 1000);
     } catch (err) {
       console.error(err);
       alert("Payment could not be processed. Try again.");
