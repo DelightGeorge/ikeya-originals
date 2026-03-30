@@ -56,7 +56,8 @@ const Lookbook = () => {
           </h1>
           <p className="text-neutral-500 max-w-2xl mx-auto text-lg font-light leading-relaxed">
             Explore the synergy of Ikeyá Fashion and Hair Care. Each look is a
-            testament to authenticity, blending modern luxury with African roots.
+            testament to authenticity, blending modern luxury with African
+            roots.
           </p>
           <div className="mt-12 flex justify-center gap-4">
             <button
@@ -219,6 +220,7 @@ const Lookbook = () => {
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901095/ikeya8_icc4qy.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1771080035/ikeya13_pyzgvp.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1774888575/w1_pv2vyn.jpg",
                   // Duplicate for seamless infinite effect
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900663/ikeya4_xzxndl.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya5_hhmpvq.jpg",
@@ -229,6 +231,7 @@ const Lookbook = () => {
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901095/ikeya8_icc4qy.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1771080035/ikeya13_pyzgvp.jpg",
+                  "https://res.cloudinary.com/dk8uaekik/image/upload/v1774888575/w1_pv2vyn.jpg",
                 ].map((image, i) => (
                   <a
                     key={i}
@@ -263,9 +266,12 @@ const Lookbook = () => {
                 <span className="text-white font-bold">@IkeyaOriginals</span> to
                 be featured
               </p>
-              <button className="bg-white text-black px-12 py-5 font-bold uppercase text-[10px] tracking-[0.3em] hover:bg-amber-800 hover:text-white transition-all duration-500 shadow-2xl">
+              <Link
+                to="/https://www.instagram.com/ikeya_originals?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                className="bg-white cursor-pointer text-black px-12 py-5 font-bold uppercase text-[10px] tracking-[0.3em] hover:bg-amber-800 hover:text-white transition-all duration-500 shadow-2xl"
+              >
                 Join the Style Club
-              </button>
+              </Link>
             </div>
           </div>
         </section>
