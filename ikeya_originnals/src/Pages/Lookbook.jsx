@@ -221,7 +221,7 @@ const Lookbook = () => {
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901095/ikeya8_icc4qy.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1771080035/ikeya13_pyzgvp.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1774888575/w1_pv2vyn.jpg",
-                  // Duplicate for seamless infinite effect
+                  // Duplicate for seamless infinite scroll effect
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900663/ikeya4_xzxndl.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya5_hhmpvq.jpg",
                   "https://res.cloudinary.com/dk8uaekik/image/upload/v1770900662/ikeya6_rdnka6.jpg",
@@ -266,12 +266,16 @@ const Lookbook = () => {
                 <span className="text-white font-bold">@IkeyaOriginals</span> to
                 be featured
               </p>
-              <Link
-                to="/https://www.instagram.com/ikeya_originals?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-                className="bg-white cursor-pointer text-black px-12 py-5 font-bold uppercase text-[10px] tracking-[0.3em] hover:bg-amber-800 hover:text-white transition-all duration-500 shadow-2xl"
+
+              {/* FIX: Use <a> for external URLs, not React Router's <Link> */}
+              <a
+                href="https://www.instagram.com/ikeya_originals?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-white text-black px-12 py-5 font-bold uppercase text-[10px] tracking-[0.3em] hover:bg-amber-800 hover:text-white transition-all duration-500 shadow-2xl"
               >
                 Join the Style Club
-              </Link>
+              </a>
             </div>
           </div>
         </section>
