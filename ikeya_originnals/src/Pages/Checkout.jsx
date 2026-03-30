@@ -11,6 +11,7 @@ import { DELIVERY_ZONES } from "../data/deliveryZones";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+// Receives kobo, displays naira. e.g. 150000 → ₦1,500
 const formatMoney = (kobo) =>
   new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -59,6 +60,9 @@ const Checkout = () => {
   const navigate = useNavigate();
 
   const cartData = location.state;
+
+  // subtotal comes from CartContext.cartTotal — already in kobo
+  // e.g. a ₦5,000 product has price: 500000 in the DB
   const subtotal = cartData?.subtotal || 0;
 
   const [loading, setLoading] = useState(false);
@@ -92,7 +96,11 @@ const Checkout = () => {
     return availableAreas[Number(form.areaIndex)] || null;
   }, [availableAreas, form.areaIndex]);
 
+  // deliveryZones prices are already in kobo — no * 100 conversion needed.
+  // e.g. { name: "Lekki Phase 1", price: 180000 } → ₦1,800
   const deliveryFee = selectedArea?.price ?? null;
+
+  // Both subtotal and deliveryFee are in kobo — safe to add directly
   const total = subtotal + (deliveryFee ?? 0);
 
   const handleStateChange = (e) => {
@@ -103,7 +111,6 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate delivery selection
     if (!form.state) {
       toast.error("Please select your state.");
       return;
@@ -126,24 +133,27 @@ const Checkout = () => {
       .join(", ");
 
     try {
+      // Everything stored in kobo for consistency across the app
       sessionStorage.setItem(
         "pendingOrder",
         JSON.stringify({
-          address: fullAddress,
-          phone: form.phone.trim(),
+          address:        fullAddress,
+          phone:          form.phone.trim(),
           alternatePhone: form.alternatePhone.trim(),
-          email: form.email.trim(),
-          name: fullName,
-          companyName: form.companyName.trim(),
-          deliveryNote: form.deliveryNote.trim(),
-          deliveryArea: selectedArea?.name,
-          deliveryState: form.state,
-          deliveryFee,
-          items: cartData.items,
-          subtotal,
+          email:          form.email.trim(),
+          name:           fullName,
+          companyName:    form.companyName.trim(),
+          deliveryNote:   form.deliveryNote.trim(),
+          deliveryArea:   selectedArea?.name,
+          deliveryState:  form.state,
+          deliveryFee,   // kobo — e.g. 180000 = ₦1,800
+          items:          cartData.items,
+          subtotal,      // kobo
         })
       );
 
+      // total is in kobo — paymentService divides by 100 before sending to backend,
+      // backend multiplies by 100 once for Paystack. Net: correct kobo charge.
       const data = await initializePayment(total);
 
       if (!data?.data?.authorization_url) {
@@ -265,7 +275,6 @@ const Checkout = () => {
                   </h2>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                    {/* State */}
                     <Field label="State" required>
                       <SelectInput value={form.state} onChange={handleStateChange} icon={MapPin}>
                         <option value="">Select state…</option>
@@ -277,7 +286,6 @@ const Checkout = () => {
                       </SelectInput>
                     </Field>
 
-                    {/* Area */}
                     <Field label="Delivery Area" required>
                       <SelectInput
                         value={form.areaIndex}
@@ -383,6 +391,7 @@ const Checkout = () => {
                           </p>
                           <p className="text-[9px] text-neutral-400">Qty: {item.quantity}</p>
                         </div>
+                        {/* item.product.price is in kobo — formatMoney handles display */}
                         <p className="text-[10px] font-bold flex-shrink-0">
                           {formatMoney((item.product?.price || 0) * item.quantity)}
                         </p>
