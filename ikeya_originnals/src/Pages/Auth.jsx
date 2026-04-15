@@ -11,23 +11,26 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { login, register, forgotPassword } from "../services/authService"; 
+import { login, register, forgotPassword } from "../services/authService";
 import { toast } from "react-hot-toast";
+
+// Two portrait shots from the lookbook — swapped based on login/register mode
+const IMAGES = {
+  login:    "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_800/v1770814975/ikeya1_hszczi.jpg",
+  register: "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_800/v1770814973/ikeya2_jhyfca.jpg",
+};
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [emailSent, setEmailSent] = useState(false);
-  
-  // Visibility toggles
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Redirect to the page they tried to visit, or default to /shop
   const from = location.state?.from?.pathname || "/shop";
 
   const [formData, setFormData] = useState({
@@ -53,16 +56,10 @@ const Auth = () => {
     }
 
     setLoading(true);
-
     try {
       if (isLogin) {
-        const response = await login({
-          email: formData.email,
-          password: formData.password,
-        });
-
-        // Check if backend requires email verification (Magic Link or OTP)
-        if (response?.requiresVerification || response?.status === 'pending') {
+        const response = await login({ email: formData.email, password: formData.password });
+        if (response?.requiresVerification || response?.status === "pending") {
           setEmailSent(true);
         } else {
           toast.success("Welcome back to the House.");
@@ -74,13 +71,11 @@ const Auth = () => {
         setEmailSent(true);
       }
     } catch (err) {
-      // Improved error detection for Production/Render fallbacks
-      const errorMsg = 
-        err.response?.data?.message || 
-        (err.message === "Network Error" 
-          ? "The House is warming up. Please try again in a moment." 
+      const errorMsg =
+        err.response?.data?.message ||
+        (err.message === "Network Error"
+          ? "The House is warming up. Please try again in a moment."
           : "An unexpected error occurred.");
-      
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -98,8 +93,7 @@ const Auth = () => {
       await forgotPassword(formData.email);
       toast.success("Reset link sent to your email!");
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "Failed to send reset link.";
-      toast.error(errorMsg);
+      toast.error(err.response?.data?.message || "Failed to send reset link.");
     } finally {
       setLoading(false);
     }
@@ -109,27 +103,57 @@ const Auth = () => {
     <Layout>
       <div className="min-h-screen pt-32 pb-20 px-6 flex items-center justify-center bg-neutral-50 selection:bg-amber-900 selection:text-white">
         <div className="max-w-5xl w-full bg-white flex flex-col md:flex-row shadow-[0_30px_80px_-15px_rgba(0,0,0,0.1)] overflow-hidden min-h-[650px]">
-          
-          {/* --- LEFT SIDE: BRAND IMAGE --- */}
+
+          {/* ── LEFT: Brand Image ── */}
           <div className="md:w-1/2 relative hidden md:block overflow-hidden">
+            {/* Image cross-fades between login and register */}
             <img
-              src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=800"
-              className="w-full h-full object-cover transition-transform duration-[10s] hover:scale-110 grayscale-[20%]"
-              alt="Ikeyà Fashion"
+              key={isLogin ? "login" : "register"}
+              src={isLogin ? IMAGES.login : IMAGES.register}
+              alt="Ikeyà Style"
+              className="w-full h-full object-cover object-top animate-fadeIn transition-all duration-700 hover:scale-105"
+              style={{ transition: "opacity 0.6s ease, transform 10s ease" }}
             />
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex flex-col justify-end p-12 text-white">
-              <span className="text-amber-500 uppercase tracking-[0.4em] text-[10px] font-bold mb-4 block">Membership</span>
-              <h2 className="text-4xl font-display font-bold uppercase tracking-tighter mb-6 leading-none whitespace-pre-line">
-                {isLogin ? "Welcome Back to \nOriginality." : "Start Your \nStyle Journey."}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-12 text-white">
+              <span className="text-amber-500 uppercase tracking-[0.4em] text-[10px] font-bold mb-4 block">
+                {isLogin ? "Membership" : "Join the House"}
+              </span>
+              <h2 className="text-4xl font-display font-bold uppercase tracking-tighter mb-4 leading-none">
+                {isLogin ? (
+                  <>Welcome Back<br /><span className="italic font-light text-amber-400">to Originality.</span></>
+                ) : (
+                  <>Start Your<br /><span className="italic font-light text-amber-400">Style Journey.</span></>
+                )}
               </h2>
-              <p className="text-sm text-neutral-300 leading-relaxed font-light max-w-sm">
-                Join the Ikeyà Style Club for exclusive drops, organic hair care secrets, and early access to collections.
+              <p className="text-sm text-neutral-300 leading-relaxed font-light max-w-xs">
+                {isLogin
+                  ? "Your wardrobe and haircare ritual await. Sign in to the House of Ikeyà."
+                  : "Join the Ikeyà Style Club for exclusive drops, organic hair care secrets, and early access to collections."}
               </p>
-              <div className="mt-8 w-12 h-[1px] bg-amber-600"></div>
+              {/* Small product hint strip */}
+              <div className="mt-8 pt-6 border-t border-white/10 flex items-center gap-3">
+                <div className="flex -space-x-2">
+                  {[
+                    "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_80/v1770900663/ikeya4_xzxndl.jpg",
+                    "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_80/v1770900662/ikeya5_hhmpvq.jpg",
+                    "https://res.cloudinary.com/dk8uaekik/image/upload/f_auto,q_auto,w_80/v1770900662/ikeya6_rdnka6.jpg",
+                  ].map((src, i) => (
+                    <img
+                      key={i}
+                      src={src}
+                      alt=""
+                      className="w-8 h-8 rounded-full object-cover border-2 border-black"
+                    />
+                  ))}
+                </div>
+                <p className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                  Join 200+ Ikeyà Women
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* --- RIGHT SIDE: FORM --- */}
+          {/* ── RIGHT: Form ── */}
           <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center bg-white relative">
             {emailSent ? (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 text-center md:text-left">
@@ -142,7 +166,8 @@ const Auth = () => {
                   Check Your <span className="text-amber-900 italic">Inbox</span>
                 </h1>
                 <p className="text-xs text-neutral-500 leading-relaxed font-light mb-8 uppercase tracking-widest">
-                  Secure link sent to <span className="text-black font-bold">{formData.email}</span>.
+                  Secure link sent to{" "}
+                  <span className="text-black font-bold">{formData.email}</span>.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-center justify-center md:justify-start gap-3 text-[10px] uppercase tracking-widest text-neutral-400 font-bold">
@@ -153,7 +178,8 @@ const Auth = () => {
                     onClick={() => { setEmailSent(false); setIsLogin(true); setError(""); }}
                     className="mt-8 group flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.3em] text-black border-b border-black pb-1 hover:text-amber-900 hover:border-amber-900 transition-all mx-auto md:mx-0"
                   >
-                    Return to Sign In <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                    Return to Sign In{" "}
+                    <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
               </div>
