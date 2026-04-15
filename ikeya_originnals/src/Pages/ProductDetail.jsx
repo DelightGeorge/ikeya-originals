@@ -77,6 +77,8 @@ const ProductDetail = () => {
     );
 
   const isFashion = product.type === "FASHION";
+  const isOutOfStock = typeof product.stock === "number" && product.stock === 0;
+
   const whatsappMessage = encodeURIComponent(
     `Hi! I'm interested in *${product.name}*. Could you help me with sizing, availability, and how to place an order?`
   );
@@ -162,12 +164,21 @@ const ProductDetail = () => {
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           {/* LEFT: Image */}
           <div className="space-y-4">
-            <div className="aspect-[3/4] bg-neutral-100 overflow-hidden">
+            <div className="aspect-[3/4] bg-neutral-100 overflow-hidden relative">
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className={`w-full h-full object-cover transition-all duration-300 ${
+                  isOutOfStock ? "opacity-50 grayscale" : ""
+                }`}
               />
+              {isOutOfStock && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="bg-black text-white text-[10px] font-bold uppercase tracking-[0.3em] px-6 py-3">
+                    Out of Stock
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -185,8 +196,20 @@ const ProductDetail = () => {
 
             <div className="h-[1px] bg-neutral-100 w-full mb-8" />
 
-            {/* Fashion enquiry notice */}
-            {isFashion && (
+            {/* Out of Stock Notice */}
+            {isOutOfStock && (
+              <div className="bg-neutral-100 border border-neutral-300 px-5 py-4 mb-8">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-700 font-bold mb-1">
+                  Currently Unavailable
+                </p>
+                <p className="text-xs text-neutral-500 leading-relaxed">
+                  This item is out of stock. Check back soon or browse our other pieces.
+                </p>
+              </div>
+            )}
+
+            {/* Fashion enquiry notice — only when in stock */}
+            {isFashion && !isOutOfStock && (
               <div className="bg-amber-50 border border-amber-200 px-5 py-4 mb-8">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-amber-800 font-bold mb-1">
                   Made-to-Order
@@ -198,8 +221,8 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {/* Quantity Selector — only for Beauty */}
-            {!isFashion && (
+            {/* Quantity Selector — only for Beauty, only when in stock */}
+            {!isFashion && !isOutOfStock && (
               <div className="flex flex-col gap-4 mb-10">
                 <span className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
                   Quantity
@@ -226,7 +249,14 @@ const ProductDetail = () => {
 
             {/* CTA Button */}
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              {isFashion ? (
+              {isOutOfStock ? (
+                <button
+                  disabled
+                  className="grow bg-neutral-200 text-neutral-400 py-5 px-8 uppercase text-[10px] font-bold tracking-[0.3em] flex items-center justify-center gap-3 cursor-not-allowed"
+                >
+                  <ShoppingBag size={16} /> Out of Stock
+                </button>
+              ) : isFashion ? (
                 <button
                   onClick={() => setShowWhatsAppModal(true)}
                   className="grow bg-black text-white py-5 px-8 uppercase text-[10px] font-bold tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-green-600 transition-all duration-500"
