@@ -235,7 +235,7 @@ const ProductDetail = () => {
                 </button>
               ) : (
                 <button
-                  onClick={() => addToBag({ productId: product.id, quantity })}
+                  onClick={() => addToBag({ productId: product.id, quantity, product })}
                   className="grow bg-black text-white py-5 px-8 uppercase text-[10px] font-bold tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-amber-900 transition-all duration-500"
                 >
                   <ShoppingBag size={16} /> Add to Bag
