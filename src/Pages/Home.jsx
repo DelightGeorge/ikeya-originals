@@ -192,7 +192,10 @@ const Home = () => {
           className="absolute inset-0 w-full h-full"
         >
           {heroImages.map((image, i) => (
-            <SwiperSlide key={i} className="w-full h-full relative overflow-hidden">
+            <SwiperSlide
+              key={i}
+              className="w-full h-full relative overflow-hidden"
+            >
               {/* Blurred fill - fills gaps left by object-contain on wider screens */}
               <div
                 className="absolute inset-0 bg-cover bg-center scale-110 blur-2xl brightness-[0.5]"
@@ -213,16 +216,16 @@ const Home = () => {
         <button
           type="button"
           aria-label="Previous slide"
-          className="hero-prev hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 z-30 items-center justify-center w-11 h-11 rounded-full bg-white/10 text-white opacity-0 group-hover/hero:opacity-100 hover:bg-white/20 transition-all"
+          className="hero-prev flex absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-30 items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-full bg-white/10 text-white opacity-100 md:opacity-0 md:group-hover/hero:opacity-100 hover:bg-white/20 transition-all"
         >
-          <ChevronLeft size={22} />
+          <ChevronLeft size={20} />
         </button>
         <button
           type="button"
           aria-label="Next slide"
-          className="hero-next hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 items-center justify-center w-11 h-11 rounded-full bg-white/10 text-white opacity-0 group-hover/hero:opacity-100 hover:bg-white/20 transition-all"
+          className="hero-next flex absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-30 items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-full bg-white/10 text-white opacity-100 md:opacity-0 md:group-hover/hero:opacity-100 hover:bg-white/20 transition-all"
         >
-          <ChevronRight size={22} />
+          <ChevronRight size={20} />
         </button>
 
         <div className="absolute inset-0 z-20 flex items-center justify-center text-center px-6">
