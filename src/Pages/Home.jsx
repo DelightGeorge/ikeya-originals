@@ -63,14 +63,16 @@ const Home = () => {
   const { addToBag } = useCart();
   const navigate = useNavigate();
 
-  const heroImages = [
-    "https://res.cloudinary.com/dk8uaekik/image/upload/v1770764193/ikeya/products/slrji7iim9uagvjq79c3.jpg",
-    // "https://res.cloudinary.com/dk8uaekik/image/upload/v1770573948/ikeya/products/joel6urttprrzpm5acmb.jpg",
-    "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
-    "https://res.cloudinary.com/dk8uaekik/image/upload/v1770814973/ikeya2_jhyfca.jpg",
-    "https://res.cloudinary.com/dk8uaekik/image/upload/v1771080034/ikeya12_otjnko.jpg",
-    "https://res.cloudinary.com/dk8uaekik/image/upload/v1774888575/w1_pv2vyn.jpg",
-  ];
+const heroImages = [
+  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/1st_one_hnwqst.jpg",
+  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/second_one_spc6iw.jpg",
+  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/thirs_jvnlm3.jpg",
+  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/4th_bla3ds.jpg",
+  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/5th_sijnki.jpg",
+  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/6th_xtg10h.jpg",
+  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/7th_snkecf.jpg",
+  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786321619/ikeya/products/tzun8wspnzzv3z5sl5pf.jpg",
+];
 
   const trustFeatures = useMemo(
     () => [
