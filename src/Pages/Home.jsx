@@ -331,7 +331,7 @@ const Home = () => {
               Sub-Brand 01
             </span>
             <h2 className="text-4xl md:text-5xl font-display text-black font-bold uppercase tracking-tighter">
-              Style X Ikeyá
+              Ikeyá
             </h2>
           </div>
           <Link
@@ -631,7 +631,7 @@ const Home = () => {
                 <div className="flex items-center gap-4 text-amber-900">
                   <Scissors size={24} />
                   <h3 className="text-xl font-bold uppercase tracking-widest text-black">
-                    Style X Ikeyá
+                    Ikeyá
                   </h3>
                 </div>
                 <p className="text-neutral-500 text-lg leading-relaxed border-l-2 border-neutral-100 pl-6">

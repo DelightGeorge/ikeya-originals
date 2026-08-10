@@ -197,7 +197,7 @@ const Navbar = () => {
         </nav>
 
         {/* ── ACTIONS & AUTH ── */}
-        <div className="flex items-center gap-4 md:gap-6">
+        <div className="flex items-center gap-2.5 sm:gap-4 md:gap-6">
           <button
             onClick={() => { setSearchOpen(!searchOpen); setMenuOpen(false); }}
             className="hover:text-amber-900 transition-colors"
@@ -207,7 +207,7 @@ const Navbar = () => {
           </button>
 
           {/* Auth section */}
-          <div className="flex items-center gap-4 border-x border-neutral-100 px-4 md:px-6">
+          <div className="flex items-center gap-3 md:gap-4 md:border-x md:border-neutral-100 md:px-6">
             {user ? (
               <div className="flex items-center gap-4">
                 <Link to="/profile" className="flex items-center gap-2 group">
@@ -230,13 +230,23 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* Admin links — Desktop */}
+            {/* Admin links */}
             {user?.role === "ADMIN" && (
-              <div className="hidden md:flex items-center gap-2 ml-2">
-                <Link to="/admin/dashboard" className="text-amber-900 hover:text-amber-700 transition-colors" title="Dashboard">
+              <div className="flex items-center gap-2.5">
+                <Link
+                  to="/admin/dashboard"
+                  className="text-amber-900 hover:text-amber-700 transition-colors"
+                  title="Dashboard"
+                  aria-label="Admin Dashboard"
+                >
                   <LayoutDashboard size={18} strokeWidth={1.5} />
                 </Link>
-                <Link to="/admin/users" className="text-amber-900 hover:text-amber-700 transition-colors" title="View All Users">
+                <Link
+                  to="/admin/users"
+                  className="hidden md:flex text-amber-900 hover:text-amber-700 transition-colors"
+                  title="View All Users"
+                  aria-label="All Users"
+                >
                   <Users size={18} strokeWidth={1.5} />
                 </Link>
               </div>
