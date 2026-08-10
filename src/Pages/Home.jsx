@@ -6,8 +6,16 @@ import { useCart } from "../Context/CartContext";
 import { formatPrice } from "../utils/formatters";
 import { MAX_FEATURED_PRODUCTS } from "../constants/products";
 import {
-  Truck, ShieldCheck, Star, RefreshCw, Sparkles,
-  Heart, Scissors, ArrowRight, ShoppingBag, MessageCircle,
+  Truck,
+  ShieldCheck,
+  Star,
+  RefreshCw,
+  Sparkles,
+  Heart,
+  Scissors,
+  ArrowRight,
+  ShoppingBag,
+  MessageCircle,
 } from "lucide-react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -18,7 +26,10 @@ import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 
 const Shimmer = ({ className = "" }) => (
-  <div className={`animate-pulse bg-neutral-200 ${className}`} aria-hidden="true" />
+  <div
+    className={`animate-pulse bg-neutral-200 ${className}`}
+    aria-hidden="true"
+  />
 );
 
 const FashionCardSkeleton = () => (
@@ -54,39 +65,51 @@ const Home = () => {
 
   const heroImages = [
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770764193/ikeya/products/slrji7iim9uagvjq79c3.jpg",
-    "https://res.cloudinary.com/dk8uaekik/image/upload/v1770573948/ikeya/products/joel6urttprrzpm5acmb.jpg",
+    // "https://res.cloudinary.com/dk8uaekik/image/upload/v1770573948/ikeya/products/joel6urttprrzpm5acmb.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770901094/ikeya11_bsl0lo.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1770814973/ikeya2_jhyfca.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1771080034/ikeya12_otjnko.jpg",
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1774888575/w1_pv2vyn.jpg",
   ];
 
-  const trustFeatures = useMemo(() => [
-    { icon: <Truck size={18} />, text: "Nationwide" },
-    { icon: <ShieldCheck size={18} />, text: "Premium" },
-    { icon: <Star size={18} />, text: "Authentic" },
-    { icon: <RefreshCw size={18} />, text: "Returns" },
-  ], []);
+  const trustFeatures = useMemo(
+    () => [
+      { icon: <Truck size={18} />, text: "Nationwide" },
+      { icon: <ShieldCheck size={18} />, text: "Premium" },
+      { icon: <Star size={18} />, text: "Authentic" },
+      { icon: <RefreshCw size={18} />, text: "Returns" },
+    ],
+    [],
+  );
 
-  const testimonials = useMemo(() => [
-    {
-      name: "Stephanie.",
-      quote: "I really love the oil and butter you sent me. Especially the scent of the oil. I dont know what you added but it smells sweet and minty at the same time. And i like how you made the butter this time... it looks and feels so good.",
-    },
-    {
-      name: "Miss Toni.",
-      quote: "I really love my dress and the fact you made it perfectly without seeing me😍.",
-    },
-    {
-      name: "Mercy Adigun.",
-      quote: "I like the texture and i noticed it makes my hair soft and easy to comb immediately after ive applied it. The smell it gives off is also very nice and refreshing. I will definitely be ordering again.",
-    },
-  ], []);
+  const testimonials = useMemo(
+    () => [
+      {
+        name: "Stephanie.",
+        quote:
+          "I really love the oil and butter you sent me. Especially the scent of the oil. I dont know what you added but it smells sweet and minty at the same time. And i like how you made the butter this time... it looks and feels so good.",
+      },
+      {
+        name: "Miss Toni.",
+        quote:
+          "I really love my dress and the fact you made it perfectly without seeing me😍.",
+      },
+      {
+        name: "Mercy Adigun.",
+        quote:
+          "I like the texture and i noticed it makes my hair soft and easy to comb immediately after ive applied it. The smell it gives off is also very nice and refreshing. I will definitely be ordering again.",
+      },
+    ],
+    [],
+  );
 
   useEffect(() => {
     const fetchFashion = async () => {
       try {
         const res = await api.get("/products/type/FASHION");
-        const data = Array.isArray(res.data) ? res.data : res.data?.content ?? res.data?.products ?? [];
+        const data = Array.isArray(res.data)
+          ? res.data
+          : (res.data?.content ?? res.data?.products ?? []);
         setFashionProducts(data.slice(0, MAX_FEATURED_PRODUCTS));
       } catch (err) {
         console.error("Fashion fetch error:", err);
@@ -99,7 +122,9 @@ const Home = () => {
     const fetchBeauty = async () => {
       try {
         const res = await api.get("/products/type/BEAUTY");
-        const data = Array.isArray(res.data) ? res.data : res.data?.content ?? res.data?.products ?? [];
+        const data = Array.isArray(res.data)
+          ? res.data
+          : (res.data?.content ?? res.data?.products ?? []);
         setBeautyProducts(data.slice(0, MAX_FEATURED_PRODUCTS));
       } catch (err) {
         console.error("Beauty fetch error:", err);
@@ -117,19 +142,20 @@ const Home = () => {
     const handleStockUpdate = (event) => {
       const { productId, stock } = event.detail;
       setFashionProducts((prev) =>
-        prev.map((p) => p.id === productId ? { ...p, stock } : p)
+        prev.map((p) => (p.id === productId ? { ...p, stock } : p)),
       );
       setBeautyProducts((prev) =>
-        prev.map((p) => p.id === productId ? { ...p, stock } : p)
+        prev.map((p) => (p.id === productId ? { ...p, stock } : p)),
       );
     };
-    window.addEventListener('productStockUpdated', handleStockUpdate);
-    return () => window.removeEventListener('productStockUpdated', handleStockUpdate);
+    window.addEventListener("productStockUpdated", handleStockUpdate);
+    return () =>
+      window.removeEventListener("productStockUpdated", handleStockUpdate);
   }, []);
 
   const getWhatsAppUrl = (product) => {
     const msg = encodeURIComponent(
-      `Hi! I'm interested in *${product.name}*. Could you help me with sizing, availability, and how to place an order?`
+      `Hi! I'm interested in *${product.name}*. Could you help me with sizing, availability, and how to place an order?`,
     );
     return `https://wa.me/+2349161270548?text=${msg}`;
   };
@@ -199,7 +225,10 @@ const Home = () => {
       <div className="bg-black py-8 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-6 text-white text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-center">
           {trustFeatures.map((item, i) => (
-            <div key={i} className="flex flex-col md:flex-row items-center justify-center gap-3">
+            <div
+              key={i}
+              className="flex flex-col md:flex-row items-center justify-center gap-3"
+            >
               <span className="text-amber-700">{item.icon}</span> {item.text}
             </div>
           ))}
@@ -221,21 +250,36 @@ const Home = () => {
             to="/shop?type=FASHION"
             className="group flex items-center gap-2 text-black font-bold text-xs tracking-[0.2em] uppercase border-b border-black pb-1 hover:text-amber-800 hover:border-amber-800 transition-all"
           >
-            The Collection <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            The Collection{" "}
+            <ArrowRight
+              size={14}
+              className="group-hover:translate-x-1 transition-transform"
+            />
           </Link>
         </div>
 
         {fashionLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-            {Array.from({ length: MAX_FEATURED_PRODUCTS }).map((_, i) => <FashionCardSkeleton key={i} />)}
+            {Array.from({ length: MAX_FEATURED_PRODUCTS }).map((_, i) => (
+              <FashionCardSkeleton key={i} />
+            ))}
           </div>
         ) : error.fashion ? (
           <div className="py-16 text-center">
-            <p className="text-neutral-400 text-xs uppercase tracking-widest mb-4">Unable to load fashion collection</p>
-            <button onClick={() => window.location.reload()} className="text-amber-800 text-xs uppercase tracking-widest font-bold hover:underline">Try Again</button>
+            <p className="text-neutral-400 text-xs uppercase tracking-widest mb-4">
+              Unable to load fashion collection
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-amber-800 text-xs uppercase tracking-widest font-bold hover:underline"
+            >
+              Try Again
+            </button>
           </div>
         ) : fashionProducts.length === 0 ? (
-          <div className="py-16 text-center text-neutral-300 text-xs uppercase tracking-widest">Collection coming soon</div>
+          <div className="py-16 text-center text-neutral-300 text-xs uppercase tracking-widest">
+            Collection coming soon
+          </div>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -254,7 +298,9 @@ const Home = () => {
                       />
                       {outOfStock ? (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                          <p className="text-white font-bold uppercase text-xs">Out of Stock</p>
+                          <p className="text-white font-bold uppercase text-xs">
+                            Out of Stock
+                          </p>
                         </div>
                       ) : (
                         <a
@@ -272,10 +318,16 @@ const Home = () => {
                         {p.name}
                       </h3>
                     </Link>
-                    <p className="text-amber-900 font-medium text-sm">{formatPrice(p.price)}</p>
-                    {typeof p.stock === "number" && p.stock > 0 && p.stock <= 3 && (
-                      <p className="text-[10px] text-amber-700 font-bold uppercase mt-1">Only {p.stock} left</p>
-                    )}
+                    <p className="text-amber-900 font-medium text-sm">
+                      {formatPrice(p.price)}
+                    </p>
+                    {typeof p.stock === "number" &&
+                      p.stock > 0 &&
+                      p.stock <= 3 && (
+                        <p className="text-[10px] text-amber-700 font-bold uppercase mt-1">
+                          Only {p.stock} left
+                        </p>
+                      )}
                   </div>
                 );
               })}
@@ -286,7 +338,10 @@ const Home = () => {
                 className="group inline-flex items-center gap-3 border border-black text-black px-12 py-4 uppercase tracking-[0.3em] text-[10px] font-bold hover:bg-black hover:text-white transition-all duration-500"
               >
                 See All Fashion
-                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight
+                  size={14}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
               </Link>
             </div>
           </>
@@ -305,8 +360,9 @@ const Home = () => {
                 Ikeyá Naturals
               </h2>
               <p className="text-neutral-400 text-lg leading-relaxed font-light">
-                Premium botanical hair care. Formulated with earth-derived ingredients to restore
-                the strength and majesty of your natural crown.
+                Premium botanical hair care. Formulated with earth-derived
+                ingredients to restore the strength and majesty of your natural
+                crown.
               </p>
             </div>
             <Link
@@ -319,20 +375,32 @@ const Home = () => {
 
           {beautyLoading ? (
             <div className="grid md:grid-cols-2 gap-12">
-              {Array.from({ length: MAX_FEATURED_PRODUCTS }).map((_, i) => <BeautyCardSkeleton key={i} />)}
+              {Array.from({ length: MAX_FEATURED_PRODUCTS }).map((_, i) => (
+                <BeautyCardSkeleton key={i} />
+              ))}
             </div>
           ) : error.beauty ? (
             <div className="py-16 text-center">
-              <p className="text-neutral-500 text-xs uppercase tracking-widest mb-4">Unable to load beauty products</p>
-              <button onClick={() => window.location.reload()} className="text-amber-600 text-xs uppercase tracking-widest font-bold hover:underline">Try Again</button>
+              <p className="text-neutral-500 text-xs uppercase tracking-widest mb-4">
+                Unable to load beauty products
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-amber-600 text-xs uppercase tracking-widest font-bold hover:underline"
+              >
+                Try Again
+              </button>
             </div>
           ) : beautyProducts.length === 0 ? (
-            <div className="py-16 text-center text-neutral-500 text-xs uppercase tracking-widest">Products coming soon</div>
+            <div className="py-16 text-center text-neutral-500 text-xs uppercase tracking-widest">
+              Products coming soon
+            </div>
           ) : (
             <>
               <div className="grid md:grid-cols-2 gap-12">
                 {beautyProducts.map((p) => {
-                  const outOfStock = typeof p.stock === "number" && p.stock <= 0;
+                  const outOfStock =
+                    typeof p.stock === "number" && p.stock <= 0;
                   return (
                     <div
                       key={p.id}
@@ -351,7 +419,9 @@ const Home = () => {
                         />
                         {outOfStock && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                            <p className="text-white font-bold uppercase text-xs">Out of Stock</p>
+                            <p className="text-white font-bold uppercase text-xs">
+                              Out of Stock
+                            </p>
                           </div>
                         )}
                       </div>
@@ -362,11 +432,19 @@ const Home = () => {
                             {p.category?.name || "Organic"}
                           </span>
                         </div>
-                        <h3 className="text-2xl font-display font-bold mb-2 uppercase tracking-tight">{p.name}</h3>
-                        <p className="text-xl text-white font-light mb-6 italic">{formatPrice(p.price)}</p>
-                        {typeof p.stock === "number" && p.stock > 0 && p.stock <= 3 && (
-                          <p className="text-[10px] text-amber-500 font-bold uppercase mb-3">Only {p.stock} left</p>
-                        )}
+                        <h3 className="text-2xl font-display font-bold mb-2 uppercase tracking-tight">
+                          {p.name}
+                        </h3>
+                        <p className="text-xl text-white font-light mb-6 italic">
+                          {formatPrice(p.price)}
+                        </p>
+                        {typeof p.stock === "number" &&
+                          p.stock > 0 &&
+                          p.stock <= 3 && (
+                            <p className="text-[10px] text-amber-500 font-bold uppercase mb-3">
+                              Only {p.stock} left
+                            </p>
+                          )}
                         <div className="flex flex-col gap-3">
                           <button
                             onClick={() => handleAddToBag(p)}
@@ -377,7 +455,8 @@ const Home = () => {
                                 : "bg-white text-black hover:bg-amber-800 hover:text-white"
                             }`}
                           >
-                            <ShoppingBag size={14} /> {outOfStock ? "Out of Stock" : "Add to Bag"}
+                            <ShoppingBag size={14} />{" "}
+                            {outOfStock ? "Out of Stock" : "Add to Bag"}
                           </button>
                           <Link
                             to={`/product/${p.id}`}
@@ -397,7 +476,10 @@ const Home = () => {
                   className="group inline-flex items-center gap-3 border border-white text-white px-12 py-4 uppercase tracking-[0.3em] text-[10px] font-bold hover:bg-white hover:text-black transition-all duration-500"
                 >
                   See All Naturals
-                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight
+                    size={14}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
                 </Link>
               </div>
             </>
@@ -411,29 +493,40 @@ const Home = () => {
           <div className="grid md:grid-cols-3 gap-16 items-start">
             <div className="md:col-span-1">
               <h2 className="text-5xl font-display text-black font-bold uppercase leading-[0.9]">
-                The<br />Brand<br />
-                <span className="text-amber-800 italic font-light lowercase text-4xl leading-none">Essence</span>
+                The
+                <br />
+                Brand
+                <br />
+                <span className="text-amber-800 italic font-light lowercase text-4xl leading-none">
+                  Essence
+                </span>
               </h2>
             </div>
             <div className="space-y-10 md:col-span-2">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-4 text-amber-900">
                   <Scissors size={24} />
-                  <h3 className="text-xl font-bold uppercase tracking-widest text-black">Style X Ikeyá</h3>
+                  <h3 className="text-xl font-bold uppercase tracking-widest text-black">
+                    Style X Ikeyá
+                  </h3>
                 </div>
                 <p className="text-neutral-500 text-lg leading-relaxed border-l-2 border-neutral-100 pl-6">
-                  Contemporary fashion rooted in African heritage. We blend structured silhouettes with
-                  traditional textiles to create timeless pieces for the modern visionary.
+                  Contemporary fashion rooted in African heritage. We blend
+                  structured silhouettes with traditional textiles to create
+                  timeless pieces for the modern visionary.
                 </p>
               </div>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-4 text-amber-900">
                   <Heart size={24} />
-                  <h3 className="text-xl font-bold uppercase tracking-widest text-black">Ikeyá Naturals</h3>
+                  <h3 className="text-xl font-bold uppercase tracking-widest text-black">
+                    Ikeyá Naturals
+                  </h3>
                 </div>
                 <p className="text-neutral-500 text-lg leading-relaxed border-l-2 border-neutral-100 pl-6">
-                  Honest hair care. We believe that what you put on your body is as important as what
-                  you put in it. Pure, brown-earth botanicals for ultimate nourishment.
+                  Honest hair care. We believe that what you put on your body is
+                  as important as what you put in it. Pure, brown-earth
+                  botanicals for ultimate nourishment.
                 </p>
               </div>
             </div>
@@ -464,10 +557,14 @@ const Home = () => {
         <div className="grid md:grid-cols-3 gap-16">
           {testimonials.map((t, i) => (
             <div key={i} className="text-left space-y-6">
-              <p className="text-2xl font-display italic text-black leading-snug">"{t.quote}"</p>
+              <p className="text-2xl font-display italic text-black leading-snug">
+                "{t.quote}"
+              </p>
               <div className="flex items-center gap-4">
                 <div className="w-8 h-[1px] bg-amber-800"></div>
-                <span className="font-bold text-black tracking-[0.2em] uppercase text-[10px]">{t.name}</span>
+                <span className="font-bold text-black tracking-[0.2em] uppercase text-[10px]">
+                  {t.name}
+                </span>
               </div>
             </div>
           ))}
