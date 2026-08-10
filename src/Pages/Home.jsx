@@ -5,6 +5,9 @@ import Layout from "../Shared/Layout/Layout";
 import { useCart } from "../Context/CartContext";
 import { formatPrice } from "../utils/formatters";
 import { MAX_FEATURED_PRODUCTS } from "../constants/products";
+import WishlistHeart from "../Components/WishlistHeart";
+import QuickViewModal from "../Components/QuickViewModal";
+import RecentlyViewed from "../Components/RecentlyViewed";
 import {
   Truck,
   ShieldCheck,
@@ -18,6 +21,7 @@ import {
   MessageCircle,
   ChevronLeft,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -62,9 +66,18 @@ const Home = () => {
   const [fashionLoading, setFashionLoading] = useState(true);
   const [beautyLoading, setBeautyLoading] = useState(true);
   const [error, setError] = useState({ fashion: false, beauty: false });
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [quickViewList, setQuickViewList] = useState([]);
+  const [fashionLowStock, setFashionLowStock] = useState(0);
+  const [beautyLowStock, setBeautyLowStock] = useState(0);
 
   const { addToBag } = useCart();
   const navigate = useNavigate();
+
+  const openQuickView = (product, list) => {
+    setQuickViewList(list);
+    setQuickViewProduct(product);
+  };
 
   const heroImages = [
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/1st_one_hnwqst.jpg",
@@ -116,6 +129,9 @@ const Home = () => {
           ? res.data
           : (res.data?.content ?? res.data?.products ?? []);
         setFashionProducts(data.slice(0, MAX_FEATURED_PRODUCTS));
+        setFashionLowStock(
+          data.filter((p) => typeof p.stock === "number" && p.stock > 0 && p.stock <= 3).length,
+        );
       } catch (err) {
         console.error("Fashion fetch error:", err);
         setError((prev) => ({ ...prev, fashion: true }));
@@ -131,6 +147,9 @@ const Home = () => {
           ? res.data
           : (res.data?.content ?? res.data?.products ?? []);
         setBeautyProducts(data.slice(0, MAX_FEATURED_PRODUCTS));
+        setBeautyLowStock(
+          data.filter((p) => typeof p.stock === "number" && p.stock > 0 && p.stock <= 3).length,
+        );
       } catch (err) {
         console.error("Beauty fetch error:", err);
         setError((prev) => ({ ...prev, beauty: true }));
@@ -239,19 +258,33 @@ const Home = () => {
             <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto mb-10 font-light tracking-[0.15em] uppercase">
               Designs <span className="mx-2 text-amber-700">•</span> Naturals
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link
-                to="/shop?type=FASHION"
-                className="w-full sm:w-auto bg-white text-black px-10 py-4 uppercase tracking-[0.2em] text-xs font-bold hover:bg-amber-800 hover:text-white transition-all duration-500"
-              >
-                Explore Designs
-              </Link>
-              <Link
-                to="/shop?type=BEAUTY"
-                className="w-full sm:w-auto bg-transparent border border-white text-white px-10 py-4 uppercase tracking-[0.2em] text-xs font-bold hover:bg-white hover:text-black transition-all duration-500"
-              >
-                Explore Naturals
-              </Link>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <div className="flex flex-col items-center gap-2">
+                <Link
+                  to="/shop?type=FASHION"
+                  className="w-full sm:w-auto bg-white text-black px-10 py-4 uppercase tracking-[0.2em] text-xs font-bold hover:bg-amber-800 hover:text-white transition-all duration-500"
+                >
+                  Explore Designs
+                </Link>
+                {fashionLowStock > 0 && (
+                  <span className="text-amber-400 text-[9px] uppercase tracking-[0.2em] font-bold">
+                    Only {fashionLowStock} piece{fashionLowStock > 1 ? "s" : ""} left
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <Link
+                  to="/shop?type=BEAUTY"
+                  className="w-full sm:w-auto bg-transparent border border-white text-white px-10 py-4 uppercase tracking-[0.2em] text-xs font-bold hover:bg-white hover:text-black transition-all duration-500"
+                >
+                  Explore Naturals
+                </Link>
+                {beautyLowStock > 0 && (
+                  <span className="text-amber-400 text-[9px] uppercase tracking-[0.2em] font-bold">
+                    Only {beautyLowStock} left in stock
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -332,6 +365,23 @@ const Home = () => {
                           outOfStock ? "opacity-50" : ""
                         }`}
                       />
+                      <WishlistHeart
+                        productId={p.id}
+                        className="absolute top-3 right-3 z-10"
+                      />
+                      {!outOfStock && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openQuickView(p, fashionProducts);
+                          }}
+                          aria-label={`Quick view ${p.name}`}
+                          className="absolute top-3 left-3 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-black/60 opacity-0 group-hover:opacity-100 hover:bg-white hover:text-amber-800 transition-all"
+                        >
+                          <Eye size={14} />
+                        </button>
+                      )}
                       {outOfStock ? (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/60">
                           <p className="text-white font-bold uppercase text-xs">
@@ -453,6 +503,23 @@ const Home = () => {
                           alt={p.name}
                           className="w-full h-full object-cover object-center grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
                         />
+                        <WishlistHeart
+                          productId={p.id}
+                          className="absolute top-3 right-3 z-10"
+                        />
+                        {!outOfStock && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openQuickView(p, beautyProducts);
+                            }}
+                            aria-label={`Quick view ${p.name}`}
+                            className="absolute top-3 left-3 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-black/60 opacity-0 group-hover:opacity-100 hover:bg-white hover:text-amber-800 transition-all"
+                          >
+                            <Eye size={14} />
+                          </button>
+                        )}
                         {outOfStock && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/60">
                             <p className="text-white font-bold uppercase text-xs">
@@ -522,6 +589,8 @@ const Home = () => {
           )}
         </div>
       </section>
+
+      <RecentlyViewed />
 
       {/* BRAND PHILOSOPHY */}
       <section className="py-32 px-6 bg-white border-b border-neutral-100">
@@ -606,6 +675,15 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      {quickViewProduct && (
+        <QuickViewModal
+          product={quickViewProduct}
+          productList={quickViewList}
+          onClose={() => setQuickViewProduct(null)}
+          onNavigate={(p) => setQuickViewProduct(p)}
+        />
+      )}
     </Layout>
   );
 };

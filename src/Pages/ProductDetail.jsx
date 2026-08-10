@@ -6,6 +6,7 @@ import { useCart } from "../Context/CartContext";
 import ProductNavigator from "../Components/ProductNavigator";
 import WishlistHeart from "../Components/WishlistHeart";
 import RelatedProducts from "../Components/RelatedProducts";
+import { addRecentlyViewed } from "../utils/recentlyViewed";
 import {
   Plus,
   Minus,
@@ -44,6 +45,7 @@ const ProductDetail = () => {
         setLoading(true);
         const res = await api.get("/products/" + id);
         setProduct(res.data);
+        addRecentlyViewed(res.data);
         setQuantity(1);
       } catch (err) {
         console.error("Error fetching product:", err);

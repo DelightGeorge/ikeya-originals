@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Search, ShoppingBag, User, Menu, X, LayoutDashboard, LogOut, Users } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, X, LayoutDashboard, LogOut, Users, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../Context/CartContext";
+import { useWishlist } from "../Context/WishlistContext";
+import { getProducts } from "../services/productService";
+import { formatPrice } from "../utils/formatters";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -101,9 +104,44 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [searchProducts, setSearchProducts] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const { cartCount } = useCart();
+  const { wishlistIds } = useWishlist();
 
   const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  // Fetch the product list once, the first time search is opened
+  useEffect(() => {
+    if (!searchOpen || searchProducts.length > 0) return;
+    const fetchForSearch = async () => {
+      try {
+        setSearchLoading(true);
+        const res = await getProducts();
+        const data = Array.isArray(res.data)
+          ? res.data
+          : (res.data?.content ?? res.data?.products ?? []);
+        setSearchProducts(data);
+      } catch (err) {
+        console.error("Error fetching products for search:", err);
+      } finally {
+        setSearchLoading(false);
+      }
+    };
+    fetchForSearch();
+  }, [searchOpen, searchProducts.length]);
+
+  const liveResults = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return searchProducts
+      .filter(
+        (p) =>
+          p.name?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q),
+      )
+      .slice(0, 5);
+  }, [query, searchProducts]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -112,6 +150,12 @@ const Navbar = () => {
       setSearchOpen(false);
       setQuery("");
     }
+  };
+
+  const handleResultClick = (productId) => {
+    navigate(`/product/${productId}`);
+    setSearchOpen(false);
+    setQuery("");
   };
 
   const handleLogout = () => {
@@ -199,6 +243,16 @@ const Navbar = () => {
             )}
           </div>
 
+          {/* Wishlist */}
+          <Link to="/wishlist" className="relative hover:text-amber-900 transition-colors" aria-label="Wishlist">
+            <Heart size={18} strokeWidth={1.5} />
+            {wishlistIds.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-amber-800 text-white text-[7px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                {wishlistIds.length}
+              </span>
+            )}
+          </Link>
+
           {/* Cart */}
           <NavLink to="/cart" className="relative hover:text-amber-900 transition-colors" aria-label="Shopping bag">
             <ShoppingBag size={18} strokeWidth={1.5} />
@@ -239,6 +293,50 @@ const Navbar = () => {
               />
               <button type="submit" className="hidden">Search</button>
             </form>
+
+            {query.trim() && (
+              <div className="max-w-3xl mx-auto mt-4 border-t border-neutral-100 pt-4">
+                {searchLoading ? (
+                  <p className="text-center text-[10px] uppercase tracking-widest text-neutral-400">
+                    Searching...
+                  </p>
+                ) : liveResults.length > 0 ? (
+                  <div className="flex flex-col divide-y divide-neutral-100">
+                    {liveResults.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => handleResultClick(p.id)}
+                        className="flex items-center gap-4 py-3 text-left hover:bg-neutral-50 transition-colors px-2"
+                      >
+                        <div className="w-12 h-14 bg-neutral-100 overflow-hidden flex-shrink-0">
+                          <img
+                            src={p.imageUrl}
+                            alt={p.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold uppercase tracking-widest text-black truncate">
+                            {p.name}
+                          </p>
+                          <p className="text-[10px] uppercase text-neutral-400 tracking-widest">
+                            {p.type}
+                          </p>
+                        </div>
+                        <p className="text-xs font-bold text-amber-900 flex-shrink-0">
+                          {formatPrice(p.price)}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-[10px] uppercase tracking-widest text-neutral-400">
+                    No products found for "{query}"
+                  </p>
+                )}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

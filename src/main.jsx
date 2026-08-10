@@ -8,6 +8,7 @@ import AnimateIn from "./Pages/AnimateIn";
 import PageLoader from "./Pages/PageLoader";
 import ImageWithLoader from "./Pages/ImageWithLoader";
 import Shop from "./Pages/Shop";
+import Wishlist from "./Pages/Wishlist";
 import Lookbook from "./Pages/Lookbook";
 import About from "./Pages/About";
 import Contact from "./Pages/Contact";
@@ -77,6 +78,10 @@ const router = createBrowserRouter([
       {
         path: "/cart",
         element: <Cart />, // Cart is public - guests can view
+      },
+      {
+        path: "/wishlist",
+        element: <Wishlist />,
       },
       {
         path: "/product/:id",

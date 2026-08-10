@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { X, ChevronLeft, ChevronRight, ShoppingBag, MessageCircle } from "lucide-react";
 import { formatPrice } from "../utils/formatters";
 import { useCart } from "../Context/CartContext";
+import { addRecentlyViewed } from "../utils/recentlyViewed";
 import WishlistHeart from "./WishlistHeart";
 
 function getWhatsAppUrl(product) {
@@ -37,6 +38,10 @@ const QuickViewModal = ({ product, productList, onClose, onNavigate }) => {
       document.body.style.overflow = "";
     };
   }, [handleKeyDown]);
+
+  useEffect(() => {
+    if (product) addRecentlyViewed(product);
+  }, [product]);
 
   if (!product) {
     return null;
