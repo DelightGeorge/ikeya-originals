@@ -3,9 +3,9 @@ import { useParams, useLocation, Link } from "react-router-dom";
 import api from "../services/api";
 import Layout from "../Shared/Layout/Layout";
 import { useCart } from "../Context/CartContext";
-import ProductNavigator from "../components/ProductNavigator";
-import WishlistHeart from "../components/WishlistHeart";
-import RelatedProducts from "../components/RelatedProducts";
+import ProductNavigator from "../Components/ProductNavigator";
+import WishlistHeart from "../Components/WishlistHeart";
+import RelatedProducts from "../Components/RelatedProducts";
 import {
   Plus,
   Minus,

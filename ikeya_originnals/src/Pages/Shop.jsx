@@ -6,8 +6,8 @@ import { PRODUCT_TYPES } from "../constants/products";
 import { Filter, ShoppingBag, AlertCircle, X, MessageCircle, Eye } from "lucide-react";
 import { getProducts } from "../services/productService";
 import { useCart } from "../Context/CartContext";
-import WishlistHeart from "../components/WishlistHeart";
-import QuickViewModal from "../components/QuickViewModal";
+import WishlistHeart from "../Components/WishlistHeart";
+import QuickViewModal from "../Components/QuickViewModal";
 
 const Shimmer = ({ className }) => (
   <div className={"animate-pulse bg-neutral-100 " + (className || "")} aria-hidden="true" />
