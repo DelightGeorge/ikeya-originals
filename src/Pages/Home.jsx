@@ -79,7 +79,8 @@ const Home = () => {
     setQuickViewProduct(product);
   };
 
-  const heroImages = [
+  // Fallback set, shown until the admin uploads slider images (or if none exist yet)
+  const DEFAULT_HERO_IMAGES = [
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/1st_one_hnwqst.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/second_one_spc6iw.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/thirs_jvnlm3.jpg",
@@ -89,6 +90,24 @@ const Home = () => {
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/7th_snkecf.jpg",
     "https://res.cloudinary.com/dk8uaekik/image/upload/v1786321619/ikeya/products/tzun8wspnzzv3z5sl5pf.jpg",
   ];
+
+  const [heroImages, setHeroImages] = useState(DEFAULT_HERO_IMAGES);
+
+  useEffect(() => {
+    const fetchHeroImages = async () => {
+      try {
+        const res = await api.get("/hero-images");
+        const data = Array.isArray(res.data) ? res.data : [];
+        if (data.length > 0) {
+          setHeroImages(data.map((h) => h.imageUrl));
+        }
+      } catch (err) {
+        console.error("Hero images fetch error:", err);
+        // Keep the default images on failure
+      }
+    };
+    fetchHeroImages();
+  }, []);
 
   const trustFeatures = useMemo(
     () => [

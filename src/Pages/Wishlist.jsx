@@ -5,11 +5,11 @@ import { useWishlist } from "../Context/WishlistContext";
 import { useCart } from "../Context/CartContext";
 import { getProducts } from "../services/productService";
 import { formatPrice } from "../utils/formatters";
-import { Heart, ShoppingBag, MessageCircle, Loader2 } from "lucide-react";
+import { Heart, ShoppingBag, MessageCircle, Loader2, Trash2 } from "lucide-react";
 import WishlistHeart from "../Components/WishlistHeart";
 
 const Wishlist = () => {
-  const { wishlistIds } = useWishlist();
+  const { wishlistIds, toggleWishlist } = useWishlist();
   const { addToBag } = useCart();
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -135,6 +135,13 @@ const Wishlist = () => {
                     </Link>
                     <p className="text-[10px] uppercase text-black/40 tracking-widest">{p.type}</p>
                     <p className="text-sm font-bold text-black">{formatPrice(p.price)}</p>
+                    <button
+                      type="button"
+                      onClick={() => toggleWishlist(p.id)}
+                      className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-neutral-400 font-bold hover:text-red-600 transition-colors mt-2 mx-auto md:mx-0"
+                    >
+                      <Trash2 size={11} /> Remove from Wishlist
+                    </button>
                   </div>
                 </div>
               );

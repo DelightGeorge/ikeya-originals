@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Loader2, Trash2, ChevronDown,
   CheckCircle2, Clock, Truck, XCircle, RefreshCw,
   AlertCircle, Edit3, Check, X, ChevronLeft, ChevronRight,
+  Images,
 } from "lucide-react";
 import api from "../../services/api";
 import { deleteProduct as deleteProductService } from "../../services/productService";
@@ -396,12 +397,20 @@ const Dashboard = () => {
                 Managing Ikeyá Naturals & Fashion
               </p>
             </div>
-            <button
-              onClick={() => navigate("/admin/add-product")}
-              className="bg-black text-white px-8 py-4 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-amber-900 transition-all duration-500"
-            >
-              <Plus size={16} /> Add New Product
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => navigate("/admin/hero-images")}
+                className="bg-white border border-neutral-200 text-black px-8 py-4 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 hover:border-black transition-all duration-500"
+              >
+                <Images size={16} /> Manage Slider
+              </button>
+              <button
+                onClick={() => navigate("/admin/add-product")}
+                className="bg-black text-white px-8 py-4 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-amber-900 transition-all duration-500"
+              >
+                <Plus size={16} /> Add New Product
+              </button>
+            </div>
           </div>
 
           {/* ── Delete Error Alert ── */}
@@ -524,7 +533,7 @@ const Dashboard = () => {
                     </p>
                   </div>
                   <p className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                    Click <Edit3 size={9} className="inline" /> to edit stock
+                    Click stock <Edit3 size={9} className="inline" /> for quick stock, or the pencil for full edit
                   </p>
                 </div>
 
@@ -561,13 +570,21 @@ const Dashboard = () => {
                             </div>
                           </div>
 
-                          {/* Right side: stock editor + delete */}
+                          {/* Right side: stock editor + edit + delete */}
                           <div className="flex items-center gap-4 flex-shrink-0">
                             <StockEditor
                               productId={product.id}
                               initialQty={product.stock}
                               onSaved={handleStockSaved}
                             />
+                            <button
+                              onClick={() => navigate(`/admin/edit-product/${product.id}`)}
+                              className="text-neutral-300 hover:text-amber-800 transition-all p-2"
+                              aria-label="Edit product"
+                              title="Edit product"
+                            >
+                              <Edit3 size={16} />
+                            </button>
                             <button
                               onClick={() => handleDelete(product.id)}
                               disabled={deletingProductId === product.id}

@@ -19,6 +19,8 @@ import Order from "./Pages/Order";
 import VerifyLogin from "./Pages/VerifyLogin";
 import Dashboard from "./Pages/Admin/Dashboard";
 import AddProduct from "./Pages/Admin/AddProduct";
+import EditProduct from "./Pages/Admin/EditProduct";
+import HeroImages from "./Pages/Admin/HeroImages";
 import ProductDetail from "./Pages/ProductDetail";
 import Profile from "./Pages/Profile";
 import ResetPassword from "./Pages/ResetPassword";
@@ -152,6 +154,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute adminOnly={true}>
             <AddProduct />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/edit-product/:id",
+        element: (
+          <ProtectedRoute adminOnly={true}>
+            <EditProduct />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/hero-images",
+        element: (
+          <ProtectedRoute adminOnly={true}>
+            <HeroImages />
           </ProtectedRoute>
         ),
       },
