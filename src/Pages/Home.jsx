@@ -16,14 +16,17 @@ import {
   ArrowRight,
   ShoppingBag,
   MessageCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectFade, Pagination } from "swiper/modules";
+import { Autoplay, EffectFade, Pagination, Navigation } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 const Shimmer = ({ className = "" }) => (
   <div
@@ -63,16 +66,16 @@ const Home = () => {
   const { addToBag } = useCart();
   const navigate = useNavigate();
 
-const heroImages = [
-  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/1st_one_hnwqst.jpg",
-  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/second_one_spc6iw.jpg",
-  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/thirs_jvnlm3.jpg",
-  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/4th_bla3ds.jpg",
-  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/5th_sijnki.jpg",
-  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/6th_xtg10h.jpg",
-  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/7th_snkecf.jpg",
-  "https://res.cloudinary.com/dk8uaekik/image/upload/v1786321619/ikeya/products/tzun8wspnzzv3z5sl5pf.jpg",
-];
+  const heroImages = [
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/1st_one_hnwqst.jpg",
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/second_one_spc6iw.jpg",
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/thirs_jvnlm3.jpg",
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/4th_bla3ds.jpg",
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/5th_sijnki.jpg",
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/6th_xtg10h.jpg",
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/7th_snkecf.jpg",
+    "https://res.cloudinary.com/dk8uaekik/image/upload/v1786321619/ikeya/products/tzun8wspnzzv3z5sl5pf.jpg",
+  ];
 
   const trustFeatures = useMemo(
     () => [
@@ -173,26 +176,54 @@ const heroImages = [
   return (
     <Layout>
       {/* HERO */}
-      <section className="relative w-full h-[85svh] md:h-screen overflow-hidden bg-black">
+      <section className="relative w-full h-[85svh] md:h-screen overflow-hidden bg-black group/hero">
         <Swiper
-          modules={[Autoplay, EffectFade, Pagination]}
+          modules={[Autoplay, EffectFade, Pagination, Navigation]}
           effect="fade"
           autoplay={{ delay: 5500, disableOnInteraction: false }}
           loop
           pagination={{ clickable: true }}
+          navigation={{
+            nextEl: ".hero-next",
+            prevEl: ".hero-prev",
+          }}
+          allowTouchMove={true}
+          grabCursor={true}
           className="absolute inset-0 w-full h-full"
         >
           {heroImages.map((image, i) => (
-            <SwiperSlide key={i} className="w-full h-full">
+            <SwiperSlide key={i} className="w-full h-full relative overflow-hidden">
+              {/* Blurred fill - fills gaps left by object-contain on wider screens */}
+              <div
+                className="absolute inset-0 bg-cover bg-center scale-110 blur-2xl brightness-[0.5]"
+                style={{ backgroundImage: `url(${image})` }}
+                aria-hidden="true"
+              />
               <img
                 src={image}
                 alt="Ikeyá Originals Brand Hero"
-                className="w-full h-full object-cover object-center brightness-[0.72]"
+                className="relative w-full h-full object-cover md:object-contain object-center brightness-[0.72]"
                 loading={i === 0 ? "eager" : "lazy"}
               />
             </SwiperSlide>
           ))}
         </Swiper>
+
+        {/* Desktop arrows - fade in on hover, hidden on phone since touch swipe handles it there */}
+        <button
+          type="button"
+          aria-label="Previous slide"
+          className="hero-prev hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 z-30 items-center justify-center w-11 h-11 rounded-full bg-white/10 text-white opacity-0 group-hover/hero:opacity-100 hover:bg-white/20 transition-all"
+        >
+          <ChevronLeft size={22} />
+        </button>
+        <button
+          type="button"
+          aria-label="Next slide"
+          className="hero-next hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 items-center justify-center w-11 h-11 rounded-full bg-white/10 text-white opacity-0 group-hover/hero:opacity-100 hover:bg-white/20 transition-all"
+        >
+          <ChevronRight size={22} />
+        </button>
 
         <div className="absolute inset-0 z-20 flex items-center justify-center text-center px-6">
           <div className="max-w-4xl mx-auto text-white">
