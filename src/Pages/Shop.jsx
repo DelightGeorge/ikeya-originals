@@ -80,8 +80,8 @@ const Shop = () => {
 
   const categories = [
     { key: PRODUCT_TYPES.ALL, label: "All" },
-    { key: PRODUCT_TYPES.FASHION, label: "StyleXIkeya" },
-    { key: PRODUCT_TYPES.BEAUTY, label: "Ikeya Naturals" },
+    { key: PRODUCT_TYPES.FASHION, label: "Ikeyá" },
+    { key: PRODUCT_TYPES.BEAUTY, label: "Ikeyá Naturals" },
   ];
 
   const isOutOfStock = (p) => typeof p.stock === "number" && p.stock <= 0;

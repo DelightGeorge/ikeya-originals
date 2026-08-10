@@ -396,9 +396,9 @@ const Home = () => {
                             openQuickView(p, fashionProducts);
                           }}
                           aria-label={`Quick view ${p.name}`}
-                          className="absolute top-3 left-3 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-black/60 opacity-0 group-hover:opacity-100 hover:bg-white hover:text-amber-800 transition-all"
+                          className="absolute top-3 left-3 z-20 flex items-center justify-center w-9 h-9 rounded-full bg-white text-black shadow-md active:bg-amber-800 active:text-white transition-colors"
                         >
-                          <Eye size={14} />
+                          <Eye size={15} strokeWidth={2} />
                         </button>
                       )}
                       {outOfStock ? (
@@ -534,9 +534,9 @@ const Home = () => {
                               openQuickView(p, beautyProducts);
                             }}
                             aria-label={`Quick view ${p.name}`}
-                            className="absolute top-3 left-3 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-black/60 opacity-0 group-hover:opacity-100 hover:bg-white hover:text-amber-800 transition-all"
+                            className="absolute top-3 left-3 z-20 flex items-center justify-center w-9 h-9 rounded-full bg-white text-black shadow-md active:bg-amber-800 active:text-white transition-colors"
                           >
-                            <Eye size={14} />
+                            <Eye size={15} strokeWidth={2} />
                           </button>
                         )}
                         {outOfStock && (
