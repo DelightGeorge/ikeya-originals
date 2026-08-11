@@ -95,7 +95,7 @@ const Fashion = () => {
       <section className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden bg-black">
         <img
           src="https://res.cloudinary.com/dk8uaekik/image/upload/v1786384492/1st_one_hnwqst.jpg"
-          alt="Style X Ikeyá Fashion Collection"
+          alt="Ikeyá Fashion Collection"
           className="w-full h-full object-cover object-center brightness-[0.6]"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
@@ -103,7 +103,7 @@ const Fashion = () => {
             Sub-Brand 01
           </span>
           <h1 className="text-5xl md:text-8xl font-display font-bold text-white uppercase tracking-tighter mb-6">
-            Style X <span className="italic font-light text-amber-500">Ikeyá</span>
+            <span className="italic font-light text-amber-500">Ikeyá</span>
           </h1>
           <p className="text-white/80 text-sm md:text-base font-light max-w-xl mx-auto tracking-[0.15em] uppercase">
             Contemporary Fashion Rooted In African Heritage
