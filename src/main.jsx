@@ -28,6 +28,8 @@ import AdminUsers from "./Pages/AdminUsers";
 import PaymentCallback from "./Pages/PaymentCallback";
 import OrderSuccess from "./Pages/OrderSuccess";
 import ProtectedRoute from "./Components/ProtectedRoute"; // ← ADD THIS IMPORT
+import Fashion from "./Pages/Fashion";
+import Hair from "./Pages/Hair";
 
 const router = createBrowserRouter([
   {
@@ -100,6 +102,14 @@ const router = createBrowserRouter([
       {
         path: "/payment-callback",
         element: <PaymentCallback />,
+      },
+      {
+        path: "/fashion",
+        element: <Fashion />,
+      },
+      {
+        path: "/hair",
+        element: <Hair />,
       },
 
       // ============================================
