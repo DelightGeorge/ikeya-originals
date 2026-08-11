@@ -82,7 +82,7 @@ const Lookbook = () => {
                 <img
                   src={item.mainImage}
                   alt={item.title}
-                  className="w-full h-[500px] md:h-[750px] object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
+                  className="w-full h-[500px] md:h-[750px] object-cover transition-all duration-1000 group-hover:scale-105"
                 />
                 <div className="absolute bottom-0 right-0 bg-white px-6 py-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black">
