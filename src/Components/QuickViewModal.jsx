@@ -6,6 +6,11 @@ import { useCart } from "../Context/CartContext";
 import { addRecentlyViewed } from "../utils/recentlyViewed";
 import WishlistHeart from "./WishlistHeart";
 
+import { Swiper, SwiperSlide } from "swiper/react";
+import { FreeMode } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/free-mode";
+
 function getWhatsAppUrl(product) {
   const msg = encodeURIComponent(
     "Hi! I'm interested in *" + product.name + "*. Could you help me with sizing, availability, and how to place an order?"
@@ -20,6 +25,7 @@ const QuickViewModal = ({ product, productList, onClose, onNavigate }) => {
   const currentIndex = product ? list.findIndex(function (p) { return p.id === product.id; }) : -1;
   const prevProduct = currentIndex > 0 ? list[currentIndex - 1] : null;
   const nextProduct = currentIndex >= 0 && currentIndex < list.length - 1 ? list[currentIndex + 1] : null;
+  const relatedProducts = product ? list.filter(function (p) { return p.id !== product.id; }) : [];
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -55,6 +61,43 @@ const QuickViewModal = ({ product, productList, onClose, onNavigate }) => {
     window.dispatchEvent(new CustomEvent("cartItemAdded", { detail: { product: product } }));
   };
 
+  const RelatedCard = ({ rp }) => {
+    const rpOutOfStock = typeof rp.stock === "number" && rp.stock <= 0;
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onNavigate(rp);
+        }}
+        className="group w-full text-left flex flex-col"
+      >
+        <div className="relative aspect-square bg-neutral-200 overflow-hidden mb-2">
+          <img
+            src={rp.imageUrl}
+            alt={rp.name}
+            className={
+              "w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 " +
+              (rpOutOfStock ? "opacity-50 grayscale-[40%]" : "")
+            }
+          />
+          {rpOutOfStock && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <p className="text-white font-bold uppercase text-[7px] tracking-widest">Sold Out</p>
+            </div>
+          )}
+        </div>
+        <p className="text-[8px] uppercase tracking-widest text-neutral-400 font-bold mb-0.5 truncate">
+          {rp.category?.name || rp.type}
+        </p>
+        <p className="text-[11px] font-bold text-black uppercase tracking-tight truncate group-hover:text-amber-800 transition-colors">
+          {rp.name}
+        </p>
+        <p className="text-[10px] text-amber-900 font-medium">{formatPrice(rp.price)}</p>
+      </button>
+    );
+  };
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 animate-fade-in"
@@ -75,7 +118,7 @@ const QuickViewModal = ({ product, productList, onClose, onNavigate }) => {
       )}
 
       <div
-        className="relative bg-white w-full max-w-3xl max-h-[85vh] overflow-y-auto grid md:grid-cols-2 shadow-2xl animate-scale-in"
+        className="relative bg-white w-full max-w-3xl lg:max-w-5xl max-h-[90vh] overflow-y-auto lg:overflow-hidden grid md:grid-cols-2 lg:grid-cols-[1fr_1fr_220px] shadow-2xl animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -156,6 +199,52 @@ const QuickViewModal = ({ product, productList, onClose, onNavigate }) => {
             </Link>
           </div>
         </div>
+
+        {/* Related products — sits beside the main content on wide screens, swipeable strip below on smaller ones */}
+        {relatedProducts.length > 0 && (
+          <div className="md:col-span-2 lg:col-span-1 border-t lg:border-t-0 lg:border-l border-neutral-100 bg-neutral-50 p-5 lg:h-full lg:overflow-hidden flex flex-col">
+            <p className="text-[9px] uppercase tracking-[0.3em] text-neutral-400 font-bold mb-4 flex-shrink-0">
+              More To Discover
+            </p>
+
+            {/* Horizontal swipe strip — shown below the main content up to the lg breakpoint */}
+            <div className="lg:hidden">
+              <Swiper
+                modules={[FreeMode]}
+                freeMode={true}
+                slidesPerView="auto"
+                spaceBetween={14}
+                grabCursor={true}
+                className="!overflow-visible"
+              >
+                {relatedProducts.map((rp) => (
+                  <SwiperSlide key={rp.id} style={{ width: "108px" }}>
+                    <RelatedCard rp={rp} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+
+            {/* Vertical side-by-side slider — shown from the lg breakpoint up, next to the image and info */}
+            <div className="hidden lg:block flex-1 min-h-0">
+              <Swiper
+                modules={[FreeMode]}
+                direction="vertical"
+                freeMode={true}
+                slidesPerView="auto"
+                spaceBetween={18}
+                grabCursor={true}
+                className="h-full !overflow-visible"
+              >
+                {relatedProducts.map((rp) => (
+                  <SwiperSlide key={rp.id} style={{ height: "150px" }}>
+                    <RelatedCard rp={rp} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          </div>
+        )}
       </div>
 
       {nextProduct && (
